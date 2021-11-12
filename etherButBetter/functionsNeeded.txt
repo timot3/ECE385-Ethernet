@@ -1,0 +1,58 @@
+                                                    ether.printIp
+                                                            Ethernet::buffer
+//ether.begin
+    //copyMac
+    //initialize
+        bitRead - arduino func
+        initSPI
+            digitalWrite - arduino func
+            bitSet - arduino func
+        pinMode - arduino func
+        disableChip
+            sei - arduino func
+        writeOp
+            enableChip
+                cli - arduino func
+            xferSPI
+        readOp
+        writeReg
+        writePhy
+        writeRegByte
+        SetBank
+        readRegByte
+                                                                                    ether.dhcpSetup()
+                                                                                        isLinkUp
+                                                                                            readPhyByte
+                                                                                        DhcpStateMachine
+                                                                                            send_dhcp_message
+                                                                                                udpPrepare
+                                                                                                    is_lan
+                                                                                                    setMACandIPs
+                                                                                                        setMACs
+                                                                                                copyIp
+                                                                                                addToBuf
+                                                                                                pgm_read_byte - arduino func
+                                                                                                addOption
+                                                                                                    addBytes
+                                                                                                udpTransmit
+                                                                                                    fill_checksum
+                                                                                                    packetSend
+                                                                                            enableBroadcast
+                                                                                            disableBroadcast
+                                                                                            dhcp_received_message_type
+                                                                                            process_dhcp_offer
+                                                                                            process_dhcp_ack
+                                                                                            send_dhcp_message
+                                                                                        updateBroadcastAddress
+ether.dnsLookup
+    clientWaitingDns
+    dnsRequest
+    checkForDnsAnswer
+ether.registerPingCallback
+ether.packetReceive
+ether.packetLoop
+ether.packetLoopIcmpCheckReply
+    check_ip_message_is_from
+ether.hisip
+ether.clientIcmpRequest
+    fill_ip_hdr_checksum

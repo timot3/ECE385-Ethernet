@@ -1,6 +1,8 @@
 
 #include "enc28j60.h"
 
+#include <system.h>
+
 uint16_t ENC28J60::bufferSize;
 bool ENC28J60::broadcast_enabled = false;
 bool ENC28J60::promiscuous_enabled = false;
@@ -215,12 +217,28 @@ bool ENC28J60::promiscuous_enabled = false;
 #define FULL_SPEED 1 // switch to full-speed SPI for bulk transfers
 
 static uint8_t Enc28j60Bank;
-static uint8_t selectPin;
+static uint8_t selectPin; // slave select
 
 // Returns nth bit of x
 uint8_t bitRead(uint8_t x, uint8_t n) {
     return (x >> n) & 0x1;
 }
+
+// disableChip, enableChip -- pass in 
+// IRQ ID's after creating the SPI module for the ethernet controller
+void disableChip() {
+  // TODO set slave select to high (it's active low)
+  alt_ic_irq_disable(/*TODO */);
+}
+
+// disableChip, enableChip -- pass in 
+// IRQ ID's after creating the SPI module for the ethernet controller
+void enableChip() {
+  alt_ic_irq_enable(/*TODO*/);
+  // TODO set slave select to low (it's active low)
+}
+
+
 
 uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
                              uint8_t csPin) {
@@ -228,10 +246,10 @@ uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
 
   selectPin = csPin;
 
-  if (bitRead(SPCR, SPE) == 0)
-    initSPI();
+  // if (bitRead(SPCR, SPE) == 0)
+  //   initSPI();
 
-  pinMode(selectPin, OUTPUT);
+  // pinMode(selectPin, OUTPUT);
   disableChip();
 
   writeOp(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);

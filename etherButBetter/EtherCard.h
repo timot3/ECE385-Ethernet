@@ -121,6 +121,16 @@ public:
     static uint16_t delaycnt; ///< Counts number of cycles of packetLoop when no packet received - used to trigger periodic gateway ARP request
 
     // EtherCard.cpp
+
+
+    /**   @brief  Sets status of a pin
+    *     @param  whichPin pin to modify
+    *     @param  status status to set pin to. Either LOW or HIGH.
+    *     @return <i>int</i> success or failure
+    */
+       static int digitalWrite(uint8_t whichPin, uint8_t status);
+
+
     /**   @brief  Initialise the network interface
     *     @param  size Size of data buffer
     *     @param  macaddr Hardware address to assign to the network interface (6 bytes)

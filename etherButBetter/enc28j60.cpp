@@ -216,6 +216,13 @@ bool ENC28J60::promiscuous_enabled = false;
 
 #define FULL_SPEED 1 // switch to full-speed SPI for bulk transfers
 
+#define HIGH 1
+#define LOW 0
+
+#define ETHERNET_CHIP_SLAVE 0
+
+volatile unsigned int *GPIO_PIO = (unsigned int*) GPIO_PIN_BASE;  
+
 static uint8_t Enc28j60Bank;
 static uint8_t selectPin; // slave select
 
@@ -239,6 +246,52 @@ void enableChip() {
 }
 
 
+// status -- 1 (HIGH), 0 (LOW)
+int digitalWrite(uint8_t whichPin, uint8_t status) {
+  if (status != LOW || status != HIGH) return -1;
+  if (status == HIGH) {
+    *GPIO_PIO |= 1 << whichPin;
+  } else {// status == LOW 
+    *GPIO_PIO &= ~(1 << whichPin);
+  }
+  return 0;
+}
+
+static void xferSPI (uint8_t data) {
+
+  uint8_t write_data[1] = {data};
+		// int alt_avalon_spi_command(alt_u32 base, alt_u32 slave,
+    //                         alt_u32 write_length,
+    //                        const alt_u8* wdata,
+    //                        alt_u32 read_length,
+    //                        alt_u8* read_data,
+    //                        alt_u32 flags)
+    alt_avalon_spi_command( SPI_0_BASE, 
+                            ETHERNET_CHIP_SLAVE,
+                            1, // write one byte
+                            write_data, // write data
+                            0, // no read
+                            NULL, // don't care about read data
+                            0); // no flags
+}
+
+static void writeOp (uint8_t op, uint8_t address, uint8_t data) {
+    enableChip();
+    xferSPI(op | (address & ADDR_MASK));
+    xferSPI(data);
+    disableChip();
+}
+
+static uint8_t readOp (uint8_t op, uint8_t address) {
+    enableChip();
+    xferSPI(op | (address & ADDR_MASK));
+    xferSPI(0x00);
+    if (address & 0x80)
+        xferSPI(0x00);
+    uint8_t result = SPDR;
+    disableChip();
+    return result;
+}
 
 uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
                              uint8_t csPin) {
@@ -295,4 +348,4 @@ uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
   if (rev > 5)
     ++rev;
   return rev;
-}
+} 

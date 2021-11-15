@@ -3,17 +3,18 @@
 //ether.begin
     //copyMac
     //initialize
-        bitRead - arduino func
-        initSPI
-            digitalWrite - arduino func
-            bitSet - arduino func
-        pinMode - arduino func
+        // bitRead - arduino func
+        // initSPI
+            // digitalWrite - arduino func
+            // bitSet - arduino func
+        						pinMode - arduino func
         disableChip
             sei - arduino func
-        writeOp
+
+        // writeOp
             enableChip
                 cli - arduino func
-            xferSPI
+            // xferSPI
         readOp
         writeReg
         writePhy

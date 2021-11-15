@@ -42,12 +42,14 @@
 #include "net.h"
 #include "stash.h"
 
+typedef uint8_t byte;
+
 /** Enable DHCP.
 *   Setting this to zero disables the use of DHCP; if a program uses DHCP it will
 *   still compile but the program will not work. Saves about 60 bytes SRAM and
 *   1550 bytes flash.
 */
-#define ETHERCARD_DHCP 1
+#define ETHERCARD_DHCP 0
 
 /** Enable client connections.
 * Setting this to zero means that the program cannot issue TCP client requests
@@ -60,7 +62,7 @@
 *   Setting this to zero means that the program will not accept TCP client
 *   requests. Saves 2 bytes SRAM and 250 bytes flash.
 */
-#define ETHERCARD_TCPSERVER 1
+#define ETHERCARD_TCPSERVER 0
 
 /** Enable UDP server functionality.
 *   If zero UDP server is disabled. It is
@@ -69,7 +71,7 @@
 *   seem to save anything; maybe the linker is then smart enough to optimize the
 *   call away.
 */
-#define ETHERCARD_UDPSERVER 1
+#define ETHERCARD_UDPSERVER 0
 
 /** Enable automatic reply to pings.
 *   Setting to zero means that the program will not automatically answer to
@@ -99,7 +101,6 @@ typedef void (*DhcpOptionCallback)(
     uint8_t option,     ///< The option number
     const byte* data,   ///< DHCP option data
     uint8_t len);       ///< Length of the DHCP option data
-
 
 
 /** This class provides the main interface to a ENC28J60 based network interface card and is the class most users will use.

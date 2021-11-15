@@ -9,3 +9,4 @@ uint8_t EtherCard::begin(const uint16_t size, const uint8_t *macaddr,
   copyMac(mymac, macaddr);
   return initialize(size, mymac, csPin);
 }
+

@@ -222,6 +222,7 @@ bool ENC28J60::promiscuous_enabled = false;
 #define ETHERNET_CHIP_SLAVE 0
 
 volatile unsigned int *GPIO_PIO = (unsigned int*) GPIO_PIN_BASE;  
+volatile uint8_t SPDR[1] = {0};
 
 static uint8_t Enc28j60Bank;
 static uint8_t selectPin; // slave select
@@ -258,7 +259,7 @@ int digitalWrite(uint8_t whichPin, uint8_t status) {
 }
 
 static void xferSPI (uint8_t data) {
-
+  SPDR = {data};
   uint8_t write_data[1] = {data};
 		// int alt_avalon_spi_command(alt_u32 base, alt_u32 slave,
     //                         alt_u32 write_length,
@@ -270,8 +271,8 @@ static void xferSPI (uint8_t data) {
                             ETHERNET_CHIP_SLAVE,
                             1, // write one byte
                             write_data, // write data
-                            0, // no read
-                            NULL, // don't care about read data
+                            1, // Read one byte
+                            SPDR, // read into SPDR
                             0); // no flags
 }
 
@@ -288,10 +289,50 @@ static uint8_t readOp (uint8_t op, uint8_t address) {
     xferSPI(0x00);
     if (address & 0x80)
         xferSPI(0x00);
-    uint8_t result = SPDR;
+    uint8_t result = SPDR[0];
     disableChip();
     return result;
 }
+
+static void SetBank (uint8_t address) {
+    if ((address & BANK_MASK) != Enc28j60Bank) {
+        writeOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_BSEL1|ECON1_BSEL0);
+        Enc28j60Bank = address & BANK_MASK;
+        writeOp(ENC28J60_BIT_FIELD_SET, ECON1, Enc28j60Bank>>5);
+    }
+}
+
+static void writeRegByte (uint8_t address, uint8_t data) {
+    SetBank(address);
+    writeOp(ENC28J60_WRITE_CTRL_REG, address, data);
+}
+
+static void writeReg(uint8_t address, uint16_t data) {
+    writeRegByte(address, data);
+    writeRegByte(address + 1, data >> 8);
+}
+
+static uint8_t readRegByte (uint8_t address) {
+    SetBank(address);
+    return readOp(ENC28J60_READ_CTRL_REG, address);
+}
+
+static void writePhy (uint8_t address, uint16_t data) {
+    writeRegByte(MIREGADR, address);
+    writeReg(MIWR, data);
+    while (readRegByte(MISTAT) & MISTAT_BUSY)
+        ;
+}
+
+static uint16_t readPhyByte (uint8_t address) {
+    writeRegByte(MIREGADR, address);
+    writeRegByte(MICMD, MICMD_MIIRD);
+    while (readRegByte(MISTAT) & MISTAT_BUSY)
+        ;
+    writeRegByte(MICMD, 0x00);
+    return readRegByte(MIRD+1);
+}
+
 
 uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
                              uint8_t csPin) {
@@ -349,3 +390,88 @@ uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
     ++rev;
   return rev;
 } 
+
+bool ENC28J60::isLinkUp() {
+    return (readPhyByte(PHSTAT2) >> 2) & 1;
+}
+
+
+static void readBuf(uint16_t len, byte* data) {
+    uint8_t nextbyte;
+
+    enableChip();
+    if (len != 0) {
+        xferSPI(ENC28J60_READ_BUF_MEM);
+
+        SPDR = {0x00};
+        while (--len) {
+            while (!(SPSR & (1<<SPIF)))
+                ;
+            nextbyte = SPDR[0];
+            SPDR = 0x00;
+            *data++ = nextbyte;
+        }
+        while (!(SPSR & (1<<SPIF)))
+            ;
+        *data++ = SPDR;
+    }
+    disableChip();
+}
+
+static void writeBuf(uint16_t len, const byte* data) {
+    enableChip();
+    if (len != 0) {
+        xferSPI(ENC28J60_WRITE_BUF_MEM);
+
+        SPDR = *data++;
+        while (--len) {
+            uint8_t nextbyte = *data++;
+        	while (!(SPSR & (1<<SPIF)))
+                ;
+            SPDR = nextbyte;
+     	};
+        while (!(SPSR & (1<<SPIF)))
+            ;
+    }
+    disableChip();
+}
+
+uint16_t ENC28J60::packetReceive() {
+    static uint16_t gNextPacketPtr = RXSTART_INIT;
+    static bool     unreleasedPacket = false;
+    uint16_t len = 0;
+
+    if (unreleasedPacket) {
+        if (gNextPacketPtr == 0)
+            writeReg(ERXRDPT, RXSTOP_INIT);
+        else
+            writeReg(ERXRDPT, gNextPacketPtr - 1);
+        unreleasedPacket = false;
+    }
+
+    if (readRegByte(EPKTCNT) > 0) {
+        writeReg(ERDPT, gNextPacketPtr);
+
+        struct {
+            uint16_t nextPacket;
+            uint16_t byteCount;
+            uint16_t status;
+        } header;
+
+        readBuf(sizeof header, (byte*) &header);
+
+        gNextPacketPtr  = header.nextPacket;
+        len = header.byteCount - 4; //remove the CRC count
+        if (len>bufferSize-1)
+            len=bufferSize-1;
+        if ((header.status & 0x80)==0)
+            len = 0;
+        else
+            readBuf(len, buffer);
+        buffer[len] = 0;
+        unreleasedPacket = true;
+
+        writeOp(ENC28J60_BIT_FIELD_SET, ECON2, ECON2_PKTDEC);
+    }
+    return len;
+}

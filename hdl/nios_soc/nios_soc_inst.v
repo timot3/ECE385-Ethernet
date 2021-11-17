@@ -1,5 +1,6 @@
 	nios_soc u0 (
 		.clk_clk          (<connected-to-clk_clk>),          //        clk.clk
+		.gpio_wire_export (<connected-to-gpio_wire_export>), //  gpio_wire.export
 		.led_wire_export  (<connected-to-led_wire_export>),  //   led_wire.export
 		.reset_reset_n    (<connected-to-reset_reset_n>),    //      reset.reset_n
 		.sdram_clk_clk    (<connected-to-sdram_clk_clk>),    //  sdram_clk.clk
@@ -15,7 +16,6 @@
 		.spi0_MISO        (<connected-to-spi0_MISO>),        //       spi0.MISO
 		.spi0_MOSI        (<connected-to-spi0_MOSI>),        //           .MOSI
 		.spi0_SCLK        (<connected-to-spi0_SCLK>),        //           .SCLK
-		.spi0_SS_n        (<connected-to-spi0_SS_n>),        //           .SS_n
-		.gpio_wire_export (<connected-to-gpio_wire_export>)  //  gpio_wire.export
+		.spi0_SS_n        (<connected-to-spi0_SS_n>)         //           .SS_n
 	);
 

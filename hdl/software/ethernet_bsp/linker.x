@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'nios_soc'
  * SOPC Builder design path: ../../nios_soc.sopcinfo
  *
- * Generated: Tue Nov 16 23:25:23 CST 2021
+ * Generated: Wed Nov 17 02:17:23 CST 2021
  */
 
 /*
@@ -50,7 +50,7 @@
 
 MEMORY
 {
-    onchip_memory2_0 : ORIGIN = 0x0, LENGTH = 16
+    onchip_memory2_0 : ORIGIN = 0x0, LENGTH = 65536
     reset : ORIGIN = 0x8000000, LENGTH = 32
     sdram : ORIGIN = 0x8000020, LENGTH = 67108832
 }

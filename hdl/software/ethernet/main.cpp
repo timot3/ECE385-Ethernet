@@ -30,7 +30,6 @@
 
 #include "EtherCard/EtherCard.h"
 
-#define SS 0x0 // TODO: add slave select pin
 
 // ethernet interface mac address, must be unique on the LAN
 static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
@@ -42,7 +41,7 @@ uint8_t Ethernet::buffer[700];
 // called when a ping comes in (replies to it are automatic)
 static void gotPinged(uint8_t *ptr) { ether.printIp(">>> ping from: ", ptr); }
 
-void setup() {
+int main() {
   printf("\n[pings]");
 
 
@@ -73,7 +72,7 @@ void setup() {
 
     // report whenever a reply to our outgoing ping comes back
     if (len > 0 && ether.packetLoopIcmpCheckReply(ether.hisip))
-      printf("   %.f ms", difftime(time(NULL), prevTime) * 0.001, 3);
+      printf("   %.f ms", difftime(time(NULL), prevTime) * 0.001);
 
     // ping a remote server once every few seconds
     if (difftime(time(NULL), prevTime) >= 5) {
@@ -82,4 +81,5 @@ void setup() {
       ether.clientIcmpRequest(ether.hisip);
     }
   }
+  return 0;
 }

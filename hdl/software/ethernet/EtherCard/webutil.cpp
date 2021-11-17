@@ -19,3 +19,8 @@ void EtherCard::printIp (const uint8_t *buf) {
 void EtherCard::copyMac (uint8_t *dst, const uint8_t *src) {
     memcpy(dst, src, ETH_LEN);
 }
+
+void EtherCard::copyIp (uint8_t *dst, const uint8_t *src) {
+    memcpy(dst, src, IP_LEN);
+}
+

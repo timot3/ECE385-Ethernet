@@ -1,6 +1,7 @@
 
 module nios_soc (
 	clk_clk,
+	gpio_wire_export,
 	led_wire_export,
 	reset_reset_n,
 	sdram_clk_clk,
@@ -16,10 +17,10 @@ module nios_soc (
 	spi0_MISO,
 	spi0_MOSI,
 	spi0_SCLK,
-	spi0_SS_n,
-	gpio_wire_export);	
+	spi0_SS_n);	
 
 	input		clk_clk;
+	output	[9:0]	gpio_wire_export;
 	output	[7:0]	led_wire_export;
 	input		reset_reset_n;
 	output		sdram_clk_clk;
@@ -36,5 +37,4 @@ module nios_soc (
 	output		spi0_MOSI;
 	output		spi0_SCLK;
 	output		spi0_SS_n;
-	output	[9:0]	gpio_wire_export;
 endmodule

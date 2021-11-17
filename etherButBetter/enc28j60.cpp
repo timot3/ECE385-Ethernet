@@ -403,6 +403,25 @@ static void readBuf(uint16_t len, byte* data) {
     if (len != 0) {
         xferSPI(ENC28J60_READ_BUF_MEM);
 
+
+
+
+  uint8_t write_data[1] = {data};
+		// int alt_avalon_spi_command(alt_u32 base, alt_u32 slave,
+    //                         alt_u32 write_length,
+    //                        const alt_u8* wdata,
+    //                        alt_u32 read_length,
+    //                        alt_u8* read_data,
+    //                        alt_u32 flags)
+    alt_avalon_spi_command( SPI_0_BASE, 
+                            ETHERNET_CHIP_SLAVE,
+                            1, // write one byte
+                            write_data, // write data
+                            1, // Read one byte
+                            SPDR, // read into SPDR
+                            0); // no flags
+
+
         SPDR = {0x00};
         while (--len) {
             while (!(SPSR & (1<<SPIF)))
@@ -418,6 +437,7 @@ static void readBuf(uint16_t len, byte* data) {
     disableChip();
 }
 
+// TODO
 static void writeBuf(uint16_t len, const byte* data) {
     enableChip();
     if (len != 0) {
@@ -474,4 +494,80 @@ uint16_t ENC28J60::packetReceive() {
         writeOp(ENC28J60_BIT_FIELD_SET, ECON2, ECON2_PKTDEC);
     }
     return len;
+}
+
+
+void ENC28J60::packetSend(uint16_t len) {
+    byte retry = 0;
+
+    #if ETHERCARD_SEND_PIPELINING
+        goto resume_last_transmission;
+    #endif
+    while (1) {
+        // latest errata sheet: DS80349C
+        // always reset transmit logic (Errata Issue 12)
+        // the Microchip TCP/IP stack implementation used to first check
+        // whether TXERIF is set and only then reset the transmit logic
+        // but this has been changed in later versions; possibly they
+        // have a reason for this; they don't mention this in the errata
+        // sheet
+        writeOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRST);
+        writeOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_TXRST);
+        writeOp(ENC28J60_BIT_FIELD_CLR, EIR, EIR_TXERIF|EIR_TXIF);
+
+        // prepare new transmission
+        if (retry == 0) {
+            writeReg(EWRPT, TXSTART_INIT);
+            writeReg(ETXND, TXSTART_INIT+len);
+            writeOp(ENC28J60_WRITE_BUF_MEM, 0, 0x00);
+            writeBuf(len, buffer);
+        }
+
+        // initiate transmission
+        writeOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRTS);
+        #if ETHERCARD_SEND_PIPELINING
+            if (retry == 0) return;
+        #endif
+
+    resume_last_transmission:
+
+        // wait until transmission has finished; referring to the data sheet and
+        // to the errata (Errata Issue 13; Example 1) you only need to wait until either
+        // TXIF or TXERIF gets set; however this leads to hangs; apparently Microchip
+        // realized this and in later implementations of their tcp/ip stack they introduced
+        // a counter to avoid hangs; of course they didn't update the errata sheet
+        uint16_t count = 0;
+        while ((readRegByte(EIR) & (EIR_TXIF | EIR_TXERIF)) == 0 && ++count < 1000U)
+            ;
+
+        if (!(readRegByte(EIR) & EIR_TXERIF) && count < 1000U) {
+            // no error; start new transmission
+            BREAKORCONTINUE
+        }
+
+        // cancel previous transmission if stuck
+        writeOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_TXRTS);
+
+    #if ETHERCARD_RETRY_LATECOLLISIONS == 0
+        BREAKORCONTINUE
+    #endif
+
+        // Check whether the chip thinks that a late collision occurred; the chip
+        // may be wrong (Errata Issue 13); therefore we retry. We could check
+        // LATECOL in the ESTAT register in order to find out whether the chip
+        // thinks a late collision occurred but (Errata Issue 15) tells us that
+        // this is not working. Therefore we check TSV
+        transmit_status_vector tsv;
+        uint16_t etxnd = readReg(ETXND);
+        writeReg(ERDPT, etxnd+1);
+        readBuf(sizeof(transmit_status_vector), (byte*) &tsv);
+        // LATECOL is bit number 29 in TSV (starting from 0)
+
+        if (!((readRegByte(EIR) & EIR_TXERIF) && (tsv.bytes[3] & 1<<5) /*tsv.transmitLateCollision*/) || retry > 16U) {
+            // there was some error but no LATECOL so we do not repeat
+            BREAKORCONTINUE
+        }
+
+        retry++;
+    }
 }

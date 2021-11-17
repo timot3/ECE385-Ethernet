@@ -15,19 +15,19 @@
             enableChip
                 cli - arduino func
             // xferSPI
-        readOp
-        writeReg
-        writePhy
-        writeRegByte
-        SetBank
-        readRegByte
+        // readOp
+        // writeReg
+        // writePhy
+        // writeRegByte
+        // SetBank
+        // readRegByte
                                                                                     ether.dhcpSetup()
-                                                                                        isLinkUp
+                                                                                        // isLinkUp
                                                                                             readPhyByte
                                                                                         DhcpStateMachine
                                                                                             send_dhcp_message
                                                                                                 udpPrepare
-                                                                                                    is_lan
+                                                                                                    // is_lan
                                                                                                     setMACandIPs
                                                                                                         setMACs
                                                                                                 copyIp
@@ -46,14 +46,20 @@
                                                                                             send_dhcp_message
                                                                                         updateBroadcastAddress
 ether.dnsLookup
-    clientWaitingDns
-    dnsRequest
-    checkForDnsAnswer
-ether.registerPingCallback
-ether.packetReceive
-ether.packetLoop
-ether.packetLoopIcmpCheckReply
-    check_ip_message_is_from
-ether.hisip
-ether.clientIcmpRequest
-    fill_ip_hdr_checksum
+    // clientWaitingDns
+    // dnsRequest
+    // checkForDnsAnswer
+//ether.registerPingCallback
+//ether.packetReceive
+//ether.packetLoop
+//ether.packetLoopIcmpCheckReply
+    //check_ip_message_is_from
+//ether.hisip
+//ether.clientIcmpRequest
+    //fill_ip_hdr_checksum
+
+
+TODO
+xferSPI
+writeBuf
+disable/enableChip

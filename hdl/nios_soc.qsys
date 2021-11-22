@@ -704,7 +704,7 @@
   <parameter name="masterSPI" value="true" />
   <parameter name="numberOfSlaves" value="1" />
   <parameter name="syncRegDepth" value="2" />
-  <parameter name="targetClockRate" value="2500000" />
+  <parameter name="targetClockRate" value="12500000" />
   <parameter name="targetSlaveSelectToSClkDelay" value="0.0" />
  </module>
  <module
@@ -911,9 +911,9 @@
  <connection kind="clock" version="18.1" start="clk_0.clk" end="nios2_gen2_0.clk" />
  <connection kind="clock" version="18.1" start="clk_0.clk" end="jtag_uart_0.clk" />
  <connection kind="clock" version="18.1" start="clk_0.clk" end="led.clk" />
- <connection kind="clock" version="18.1" start="clk_0.clk" end="spi_0.clk" />
  <connection kind="clock" version="18.1" start="clk_0.clk" end="gpio.clk" />
  <connection kind="clock" version="18.1" start="clk_0.clk" end="timer_0.clk" />
+ <connection kind="clock" version="18.1" start="clk_0.clk" end="spi_0.clk" />
  <connection
    kind="clock"
    version="18.1"

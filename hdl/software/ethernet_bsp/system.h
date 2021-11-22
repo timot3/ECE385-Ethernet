@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'nios_soc'
  * SOPC Builder design path: ../../nios_soc.sopcinfo
  *
- * Generated: Wed Nov 17 02:17:23 CST 2021
+ * Generated: Sun Nov 21 20:04:09 CST 2021
  */
 
 /*
@@ -214,7 +214,7 @@
 
 #define ALT_INCLUDE_INSTRUCTION_RELATED_EXCEPTION_API
 #define ALT_MAX_FD 32
-#define ALT_SYS_CLK none
+#define ALT_SYS_CLK TIMER_0
 #define ALT_TIMESTAMP_CLK none
 
 
@@ -371,7 +371,7 @@
 #define SPI_0_PREFIX "spi_"
 #define SPI_0_SPAN 32
 #define SPI_0_SYNC_REG_DEPTH 2
-#define SPI_0_TARGETCLOCK 2500000u
+#define SPI_0_TARGETCLOCK 12500000u
 #define SPI_0_TARGETSSDELAY "0.0"
 #define SPI_0_TYPE "altera_avalon_spi"
 
@@ -388,7 +388,7 @@
 #define SYSID_QSYS_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_0_NAME "/dev/sysid_qsys_0"
 #define SYSID_QSYS_0_SPAN 8
-#define SYSID_QSYS_0_TIMESTAMP 1637136727
+#define SYSID_QSYS_0_TIMESTAMP 1637546318
 #define SYSID_QSYS_0_TYPE "altera_avalon_sysid_qsys"
 
 

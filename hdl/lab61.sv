@@ -29,7 +29,7 @@
 module lab61 (
 
       ///////// Clocks /////////
-      input     MAX10_CLK1_50, 
+      input     MAX10_CLK1_50,
 
       ///////// GPIO /////////
 	
@@ -88,12 +88,21 @@ module lab61 (
 //											// gpio
 //											.gpio_wire_export(gpio_wire)
 //											 );
-
-	assign ARDUINO_IO[10] = SPI0_CS_N;
+	logic SPI0_CS_N, SPI0_SCLK, SPI0_MOSI;
+	assign ARDUINO_IO[9] = SPI0_CS_N;
 	assign ARDUINO_IO[13] = SPI0_SCLK;
 	assign ARDUINO_IO[11] = SPI0_MOSI;
 	assign ARDUINO_IO[12] = 1'bZ;
 	assign SPI0_MISO = ARDUINO_IO[12];
+
+//	assign ARDUINO_IO[9] = 1'b0;
+//	assign ARDUINO_IO[13] = SPI0_SCLK;
+//	assign ARDUINO_IO[11] = SPI0_MOSI;
+//	assign ARDUINO_IO[12] = 1'bZ;
+//	assign SPI0_MISO = ARDUINO_IO[12];
+//	logic temp;
+//	assign SPI0_SCLK = 1'b0;
+	
 	
 	nios_soc u0 (
 		.clk_clk                           (MAX10_CLK1_50),  //clk.clk

@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Nov 21, 2021 8:23:35 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1637547815597</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>Nov 21, 2021 11:05:22 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1637557522412</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>/media/sf_vm_shared/ECE385-Ethernet/hdl/software/ethernet_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>../../nios_soc.sopcinfo</SopcDesignFile>

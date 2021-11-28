@@ -82,22 +82,18 @@ static bool checkForDnsAnswer (uint16_t plen) {
 }
 
 bool EtherCard::dnsLookup (const char* name, bool fromRam) {
-    uint16_t start = time(NULL);
+    uint16_t start = clock();
 
     while(!isLinkUp())
     {
-    	printf("not islinkup");
-        if (difftime(time(NULL), start) >= 30000 / 1000) {
-        	printf("not islinkup time");
+        if (uint16_t(clock()) - start >= 30000) {
             return false; //timeout waiting for link
         }
     }
     while(clientWaitingDns())
     {
-    	printf("while waiting dns");
         packetLoop(packetReceive());
-        if (difftime(time(NULL), start) >= 30000 / 1000) {
-        	printf("while waiting dns time");
+        if (uint16_t(clock()) - start >= 30000) {
             return false; //timeout waiting for gateway ARP
         }
     }
@@ -107,7 +103,7 @@ bool EtherCard::dnsLookup (const char* name, bool fromRam) {
 
     start = time(NULL);
     while (hisip[0] == 0) {
-        if (difftime(time(NULL), start) >= 30000 / 1000)
+        if (uint16_t(clock()) - start >= 30000)
             return false; //timeout waiting for dns response
         uint16_t len = packetReceive();
         if (len > 0 && packetLoop(len) == 0) //packet not handled by tcp/ip packet loop

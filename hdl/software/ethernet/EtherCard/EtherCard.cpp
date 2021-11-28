@@ -20,11 +20,31 @@ uint16_t EtherCard::delaycnt = 0; //request gateway ARP lookup
 
 uint8_t EtherCard::begin(const uint16_t size, const uint8_t *macaddr,
                          uint8_t csPin) {
-  using_dhcp = false;
-  printf("starting begin");
+  using_dhcp = true;
   copyMac(mymac, macaddr);
-  printf("copy mac done");
   uint8_t ret = initialize(size, mymac, csPin);
-  printf("finished init (%x)", ret);
+  printf("mymac: ");
+  for(int i = 0; i < 6; i++)
+	  printf("%x, ", mymac[i]);
+  printf("\nfinished init (ret: %x)\n", ret);
   return ret;
+}
+
+bool EtherCard::staticSetup (const uint8_t* my_ip,
+                             const uint8_t* gw_ip,
+                             const uint8_t* dns_ip,
+                             const uint8_t* mask) {
+    using_dhcp = true;
+
+    if (my_ip != 0)
+        copyIp(myip, my_ip);
+    if (gw_ip != 0)
+        setGwIp(gw_ip);
+    if (dns_ip != 0)
+        copyIp(dnsip, dns_ip);
+    if(mask != 0)
+        copyIp(netmask, mask);
+    updateBroadcastAddress();
+    delaycnt = 0; //request gateway ARP lookup
+    return true;
 }

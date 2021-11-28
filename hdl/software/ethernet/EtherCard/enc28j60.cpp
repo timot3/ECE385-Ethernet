@@ -347,18 +347,34 @@ static uint8_t readOp (uint8_t op, uint8_t address) {
     uint8_t send_data[3];
     send_data[0] = op | (address & ADDR_MASK);
     send_data[1] = 0x00;
-    uint8_t recieve_data[1];
+    uint8_t recieve_data_bad[1], recieve_data[1];
+
+//    printf("sending: %x\n", send_data[0]);
 
     if (address & 0x80) {
     	send_data[2] = 0x00;
     	alt_avalon_spi_command( SPI_0_BASE,
     							ETHERNET_CHIP_SLAVE,
-    							3, // write one byte
+    							2, // write one byte
+    							send_data, // write data
+    							1, // Read one byte
+								recieve_data_bad, // read into SPDR
+    							0); // no flags
+    	alt_avalon_spi_command( SPI_0_BASE,
+    							ETHERNET_CHIP_SLAVE,
+    							2, // write one byte
     							send_data, // write data
     							1, // Read one byte
 								recieve_data, // read into SPDR
     							0); // no flags
     } else {
+    	alt_avalon_spi_command( SPI_0_BASE,
+    							ETHERNET_CHIP_SLAVE,
+    							2, // write one byte
+    							send_data, // write data
+    							1, // Read one byte
+								recieve_data_bad, // read into SPDR
+    							0); // no flags
     	alt_avalon_spi_command( SPI_0_BASE,
     							ETHERNET_CHIP_SLAVE,
     							2, // write one byte
@@ -390,8 +406,6 @@ static void writeReg(uint8_t address, uint16_t data) {
     writeRegByte(address + 1, data >> 8);
 }
 
-
-
 static uint8_t readRegByte (uint8_t address) {
     SetBank(address);
     return readOp(ENC28J60_READ_CTRL_REG, address);
@@ -422,9 +436,41 @@ uint8_t getThing(unsigned char address) {
 	return readRegByte(address);
 }
 
+static void getMacAddr() {
+	uint8_t arr[6];
+	arr[0] = readReg(MAADR5);
+	arr[1] = readReg(MAADR4);
+	arr[2] = readReg(MAADR3);
+	arr[3] = readReg(MAADR2);
+	arr[4] = readReg(MAADR1);
+	arr[5] = readReg(MAADR0);
+
+	for(int i = 0; i < 6; i++)
+		printf("%x, ", arr[i]);
+}
+
+static void doOtherThing() {
+	uint8_t arr[2];
+	arr[0] = readReg(EPKTCNT);
+
+	writeOp(ENC28J60_BIT_FIELD_SET, EPKTCNT, 0x05);
+
+	arr[1] = readReg(EPKTCNT);
+	printf("doOtherThing out: ");
+	for(int i = 0; i < 2; i++)
+		printf("%x, ", arr[i]);
+
+}
 
 uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
                              uint8_t csPin) {
+
+
+//	uint8_t arr2[1];
+//	arr2[0] = readReg(0x0A);
+//	printf("ar: %x", arr2[0]);
+//	return 6;
+
   bufferSize = size;
 
   selectPin = csPin;
@@ -437,10 +483,8 @@ uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
 
   writeOp(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);
   delay(2); // errata B7/2
-  printf("before while");
   while (!(readOp(ENC28J60_READ_CTRL_REG, ESTAT) & ESTAT_CLKRDY))
     ;
-  printf("after while");
 
   writeReg(ERXST, RXSTART_INIT);
   writeReg(ERXRDPT, RXSTART_INIT);
@@ -461,16 +505,37 @@ uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
   writeReg(MAIPG, 0x0C12);
   writeRegByte(MABBIPG, 0x12);
   writeReg(MAMXFL, MAX_FRAMELEN);
-  writeRegByte(MAADR5, macaddr[0]);
-  writeRegByte(MAADR4, macaddr[1]);
-  writeRegByte(MAADR3, macaddr[2]);
-  writeRegByte(MAADR2, macaddr[3]);
-  writeRegByte(MAADR1, macaddr[4]);
-  writeRegByte(MAADR0, macaddr[5]);
+  printf("at 2nd: %x\n", macaddr[1]);
+
+	writeRegByte(MAADR5, macaddr[0]);
+	writeRegByte(MAADR4, macaddr[1]);
+	uint8_t send_data[2];
+	send_data[0] = 0x45;
+	send_data[2] = 0x69;
+	alt_avalon_spi_command( SPI_0_BASE,
+							ETHERNET_CHIP_SLAVE,
+							2, // write one byte
+							send_data, // write data
+							0, // Read one byte
+							0, // read into SPDR
+							0); // no flags
+
+
+	writeRegByte(MAADR3, macaddr[2]);
+	writeRegByte(MAADR2, macaddr[3]);
+	writeRegByte(MAADR1, macaddr[4]);
+	writeRegByte(MAADR0, macaddr[5]);
+
+	getMacAddr();
+
   writePhy(PHCON2, PHCON2_HDLDIS);
   SetBank(ECON1);
   writeOp(ENC28J60_BIT_FIELD_SET, EIE, EIE_INTIE | EIE_PKTIE);
   writeOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_RXEN);
+
+//  SetBank(ECON2);
+//  writeOp(ENC28J60_BIT_FIELD_SET, ECON2, 0x80);
+//  SetBank(ECON1);
 
   uint8_t rev = readRegByte(EREVID);
   // microchip forgot to step the number on the silicon when they
@@ -479,6 +544,9 @@ uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
   // there is no B8 out yet
   if (rev > 5)
     ++rev;
+
+
+
   return rev;
 }
 
@@ -489,8 +557,15 @@ bool ENC28J60::isLinkUp() {
 
 static void readBuf(uint16_t len, byte* data) {
     if (len != 0) {
-    	uint8_t send_data[1];
+    	uint8_t send_data[1], data_bad[len];
     	send_data[0] = ENC28J60_READ_BUF_MEM;
+    	alt_avalon_spi_command( SPI_0_BASE,
+    							ETHERNET_CHIP_SLAVE,
+    							1, //
+								send_data, // write data
+    							len, // Read 8 bytes
+								data_bad, // read into SPDR
+    							0); // no flags
     	alt_avalon_spi_command( SPI_0_BASE,
     							ETHERNET_CHIP_SLAVE,
     							1, //
@@ -513,7 +588,7 @@ static void writeBuf(uint16_t len, const byte* data) {
 								send_data, // write data
     							0, // Read 8 bytes
     							0, // read into SPDR
-    							0); // no flags
+    							ALT_AVALON_SPI_COMMAND_MERGE); // no flags
     	alt_avalon_spi_command( SPI_0_BASE,
     							ETHERNET_CHIP_SLAVE,
 								len, //
@@ -538,7 +613,9 @@ uint16_t ENC28J60::packetReceive() {
         unreleasedPacket = false;
     }
 
-    if (readRegByte(EPKTCNT) > 0) {
+    uint8_t r = readRegByte(EPKTCNT);
+    if (r > 0) {
+    	printf("readregbyte %d\n", r);
         writeReg(ERDPT, gNextPacketPtr);
 
         struct {

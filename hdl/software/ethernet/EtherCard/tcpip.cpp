@@ -692,6 +692,7 @@ uint16_t EtherCard::packetLoop (uint16_t plen) {
 
 #if ETHERCARD_DHCP
     if(using_dhcp) {
+    	printf("top of packetloop\n");
         ether.DhcpStateMachine(plen);
     }
 #endif

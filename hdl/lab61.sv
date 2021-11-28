@@ -90,6 +90,7 @@ module lab61 (
 //											 );
 	logic SPI0_CS_N, SPI0_SCLK, SPI0_MOSI;
 	assign ARDUINO_IO[9] = SPI0_CS_N;
+
 	assign ARDUINO_IO[13] = SPI0_SCLK;
 	assign ARDUINO_IO[11] = SPI0_MOSI;
 	assign ARDUINO_IO[12] = 1'bZ;

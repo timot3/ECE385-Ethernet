@@ -317,6 +317,9 @@ static bool dhcp_received_message_type (uint16_t len, byte msgType) {
     // Map struct onto payload
     DHCPdata *dhcpPtr = (DHCPdata*) (gPB + UDP_DATA_P);
 
+    if(len > 0)
+    	printf("len:%d\n", len);
+
     if (len >= 70 && gPB[UDP_SRC_PORT_L_P] == DHCP_SERVER_PORT &&
             dhcpPtr->xid == currentXid ) {
 
@@ -349,12 +352,10 @@ bool EtherCard::dhcpSetup (const char *hname, bool fromRam) {
     if(hname != NULL) {
         if(fromRam) {
             strncpy(hostname, hname, DHCP_HOSTNAME_MAX_LEN);
-        }
-        else {
+        } else {
             printf("BAD THING HAPPENED IN dhcpSetup\n");
         }
-    }
-    else {
+    } else {
         // Set a unique hostname, use Arduino-?? with last octet of mac address
         hostname[strlen(hostname) - 2] = toAsciiHex(mymac[5] >> 4);   // Appends mac to last 2 digits of the hostname
         hostname[strlen(hostname) - 1] = toAsciiHex(mymac[5]);   // Even if it's smaller than the maximum <thus, strlen(hostname)>
@@ -364,11 +365,15 @@ bool EtherCard::dhcpSetup (const char *hname, bool fromRam) {
     uint16_t start = millis();
 
     while (dhcpState != DHCP_STATE_BOUND && uint16_t(millis()) - start < 60000) {
-        if (isLinkUp()) DhcpStateMachine(packetReceive());
+        if (isLinkUp()) {
+        	printf("islinkup packet recieve\n");
+        	DhcpStateMachine(packetReceive());
+        }
     }
     updateBroadcastAddress();
     delaycnt = 0;
-    return dhcpState == DHCP_STATE_BOUND ;
+    printf("Finished dhcpSetup... returning %d (%d)\n", (dhcpState == DHCP_STATE_BOUND), dhcpState);
+    return dhcpState == DHCP_STATE_BOUND;
 }
 
 void EtherCard::dhcpAddOptionCallback(uint8_t option, DhcpOptionCallback callback)
@@ -396,16 +401,16 @@ void EtherCard::DhcpStateMachine (uint16_t len)
     }
     switch (dhcpState) {
     case DHCP_STATE_INIT:
-    	printf("Init");
+    	printf("Init\n");
         break;
     case DHCP_STATE_SELECTING:
-    	printf("Selecting");
+    	printf("Selecting\n");
         break;
     case DHCP_STATE_REQUESTING:
-    	printf("Requesting");
+    	printf("Requesting\n");
         break;
     case DHCP_STATE_RENEWING:
-    	printf("Renew");
+    	printf("Renew\n");
         break;
     }
 #endif

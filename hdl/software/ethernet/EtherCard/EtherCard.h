@@ -54,7 +54,7 @@ typedef uint8_t byte;
 *   still compile but the program will not work. Saves about 60 bytes SRAM and
 *   1550 bytes flash.
 */
-#define ETHERCARD_DHCP 0
+#define ETHERCARD_DHCP 1
 
 /** Enable client connections.
 * Setting this to zero means that the program cannot issue TCP client requests
@@ -67,7 +67,7 @@ typedef uint8_t byte;
 *   Setting this to zero means that the program will not accept TCP client
 *   requests. Saves 2 bytes SRAM and 250 bytes flash.
 */
-#define ETHERCARD_TCPSERVER 0
+#define ETHERCARD_TCPSERVER 1
 
 /** Enable UDP server functionality.
 *   If zero UDP server is disabled. It is
@@ -76,7 +76,7 @@ typedef uint8_t byte;
 *   seem to save anything; maybe the linker is then smart enough to optimize the
 *   call away.
 */
-#define ETHERCARD_UDPSERVER 0
+#define ETHERCARD_UDPSERVER 1
 
 /** Enable automatic reply to pings.
 *   Setting to zero means that the program will not automatically answer to

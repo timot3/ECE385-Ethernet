@@ -15,6 +15,7 @@
 
 // ******* SERVICE PORTS *******
 #define HTTP_PORT 80
+//#define HTTP_PORT 3080
 #define DNS_PORT  53
 #define NTP_PORT  123
 

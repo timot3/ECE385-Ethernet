@@ -19,10 +19,24 @@ int main() {
 
 
   // Change 'SS' to your Slave Select pin, if you arn't using the default pin
-  if (ether.begin(sizeof ether.buffer, (const uint8_t*)mymac, SS) == 0)
+  uint16_t sz = sizeof ether.buffer;
+  printf("Size: %x\n", sz);
+  if (ether.begin(sz, (const uint8_t*)mymac, SS) == 0)
     printf("Failed to access Ethernet controller");
+
+//  return 0;
    if (!ether.dhcpSetup())
      printf("DHCP failed");
+
+  const static uint8_t ip[] = {192,168,0,220};
+  const static uint8_t gw[] = {192,168,0,1};
+  const static uint8_t dns[] = {192,168,0,1};
+
+  if(!ether.staticSetup(ip, gw, dns))
+  {
+      // handle failure to configure static IP address (current implementation always returns true!)
+	  printf("pain and suffering");
+  }
 
   ether.printIp("IP:  ", ether.myip);
   ether.printIp("GW:  ", ether.gwip);
@@ -30,6 +44,11 @@ int main() {
   // use DNS to locate the IP address we want to ping
   if (!ether.dnsLookup("www.google.com"))
     printf("DNS failed");
+
+//  ether.hisip[0] = 192;
+//  ether.hisip[1] = 168;
+//  ether.hisip[2] = 0;
+//  ether.hisip[3] = 241;
 
   ether.printIp("SRV: ", ether.hisip);
 

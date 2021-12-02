@@ -704,7 +704,7 @@
   <parameter name="masterSPI" value="true" />
   <parameter name="numberOfSlaves" value="1" />
   <parameter name="syncRegDepth" value="2" />
-  <parameter name="targetClockRate" value="12500000" />
+  <parameter name="targetClockRate" value="1000000" />
   <parameter name="targetSlaveSelectToSClkDelay" value="0.0" />
  </module>
  <module
@@ -929,21 +929,21 @@
    version="18.1"
    start="nios2_gen2_0.irq"
    end="jtag_uart_0.irq">
-  <parameter name="irqNumber" value="1" />
+  <parameter name="irqNumber" value="2" />
  </connection>
  <connection
    kind="interrupt"
    version="18.1"
    start="nios2_gen2_0.irq"
    end="spi_0.irq">
-  <parameter name="irqNumber" value="3" />
+  <parameter name="irqNumber" value="1" />
  </connection>
  <connection
    kind="interrupt"
    version="18.1"
    start="nios2_gen2_0.irq"
    end="timer_0.irq">
-  <parameter name="irqNumber" value="2" />
+  <parameter name="irqNumber" value="3" />
  </connection>
  <connection
    kind="reset"

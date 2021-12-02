@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'nios_soc'
  * SOPC Builder design path: ../../nios_soc.sopcinfo
  *
- * Generated: Sun Nov 21 20:04:09 CST 2021
+ * Generated: Wed Dec 01 23:18:03 CST 2021
  */
 
 /*
@@ -225,7 +225,7 @@
 
 #define ALT_MODULE_CLASS_jtag_uart_0 altera_avalon_jtag_uart
 #define JTAG_UART_0_BASE 0x11138
-#define JTAG_UART_0_IRQ 1
+#define JTAG_UART_0_IRQ 2
 #define JTAG_UART_0_IRQ_INTERRUPT_CONTROLLER_ID 0
 #define JTAG_UART_0_NAME "/dev/jtag_uart_0"
 #define JTAG_UART_0_READ_DEPTH 64
@@ -362,7 +362,7 @@
 #define SPI_0_DELAYUNITS "ns"
 #define SPI_0_EXTRADELAY 0
 #define SPI_0_INSERT_SYNC 0
-#define SPI_0_IRQ 3
+#define SPI_0_IRQ 1
 #define SPI_0_IRQ_INTERRUPT_CONTROLLER_ID 0
 #define SPI_0_ISMASTER 1
 #define SPI_0_LSBFIRST 0
@@ -371,7 +371,7 @@
 #define SPI_0_PREFIX "spi_"
 #define SPI_0_SPAN 32
 #define SPI_0_SYNC_REG_DEPTH 2
-#define SPI_0_TARGETCLOCK 12500000u
+#define SPI_0_TARGETCLOCK 1000000u
 #define SPI_0_TARGETSSDELAY "0.0"
 #define SPI_0_TYPE "altera_avalon_spi"
 
@@ -388,7 +388,7 @@
 #define SYSID_QSYS_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_0_NAME "/dev/sysid_qsys_0"
 #define SYSID_QSYS_0_SPAN 8
-#define SYSID_QSYS_0_TIMESTAMP 1637546318
+#define SYSID_QSYS_0_TIMESTAMP 1638421957
 #define SYSID_QSYS_0_TYPE "altera_avalon_sysid_qsys"
 
 
@@ -403,7 +403,7 @@
 #define TIMER_0_COUNTER_SIZE 64
 #define TIMER_0_FIXED_PERIOD 0
 #define TIMER_0_FREQ 50000000
-#define TIMER_0_IRQ 2
+#define TIMER_0_IRQ 3
 #define TIMER_0_IRQ_INTERRUPT_CONTROLLER_ID 0
 #define TIMER_0_LOAD_VALUE 49999
 #define TIMER_0_MULT 0.001

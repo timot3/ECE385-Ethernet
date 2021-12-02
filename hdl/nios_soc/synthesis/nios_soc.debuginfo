@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="nios_soc" kind="system" version="18.1" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2021.11.21.19:58:52 -->
+ <!-- 2021.12.01.23:12:50 -->
  <!-- A collection of modules and connections -->
  <parameter name="clockCrossingAdapter">
   <type>com.altera.sopcmodel.ensemble.EClockAdapter</type>
@@ -53,7 +53,7 @@
  </parameter>
  <parameter name="generationId">
   <type>int</type>
-  <value>1637546318</value>
+  <value>1638421957</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>true</visible>
@@ -9845,7 +9845,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TARGETCLOCK</name>
-   <value>12500000u</value>
+   <value>1000000u</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TARGETSSDELAY</name>
@@ -9949,7 +9949,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="targetClockRate">
    <type>long</type>
-   <value>12500000</value>
+   <value>1000000</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -9984,7 +9984,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="actualClockRate">
    <type>double</type>
-   <value>1.25E7</value>
+   <value>1000000.0</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -10661,7 +10661,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMESTAMP</name>
-   <value>1637546318</value>
+   <value>1638421957</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.compatible</name>
@@ -10681,7 +10681,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.dts.params.timestamp</name>
-   <value>1637546318</value>
+   <value>1638421957</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.vendor</name>
@@ -10697,7 +10697,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="timestamp">
    <type>int</type>
-   <value>1637546318</value>
+   <value>1638421957</value>
    <derived>true</derived>
    <enabled>false</enabled>
    <visible>false</visible>
@@ -16272,7 +16272,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="IRQ_MAP">
    <type>java.lang.String</type>
-   <value>0:1,1:3,2:2</value>
+   <value>0:2,1:1,2:3</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -20250,5 +20250,5 @@ parameters are a RESULT of the module parameters. -->
   <version>18.1</version>
  </plugin>
  <reportVersion>18.1 625</reportVersion>
- <uniqueIdentifier>080027A11FE00000017D455DEE33</uniqueIdentifier>
+ <uniqueIdentifier>080027A11FE00000017D798F1C11</uniqueIdentifier>
 </EnsembleReport>

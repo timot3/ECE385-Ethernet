@@ -317,8 +317,12 @@ static bool dhcp_received_message_type (uint16_t len, byte msgType) {
     // Map struct onto payload
     DHCPdata *dhcpPtr = (DHCPdata*) (gPB + UDP_DATA_P);
 
-    if(len > 0)
-    	printf("len:%d\n", len);
+//    if(len > 0) {
+//    	printf("len: %d\n", len);
+//    	for(int i = 0; i < len; i++)
+//    		printf("%d (%x), ", gPB[i], i);
+//    	printf("\n");
+//    }
 
     if (len >= 70 && gPB[UDP_SRC_PORT_L_P] == DHCP_SERVER_PORT &&
             dhcpPtr->xid == currentXid ) {
@@ -327,7 +331,9 @@ static bool dhcp_received_message_type (uint16_t len, byte msgType) {
         do {
             byte option = *ptr++;
             byte optionLen = *ptr++;
+            printf("option: %x, msg: %x\n", option, *ptr);
             if(option == DHCP_OPT_MESSAGE_TYPE && *ptr == msgType ) {
+            	printf("returning true in received message\n");
                 return true;
             }
             ptr += optionLen;
@@ -366,7 +372,6 @@ bool EtherCard::dhcpSetup (const char *hname, bool fromRam) {
 
     while (dhcpState != DHCP_STATE_BOUND && uint16_t(millis()) - start < 60000) {
         if (isLinkUp()) {
-        	printf("islinkup packet recieve\n");
         	DhcpStateMachine(packetReceive());
         }
     }

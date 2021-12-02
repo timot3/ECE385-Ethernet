@@ -6,6 +6,8 @@
 //#include <stdlib.h>
 
 #include <stdio.h>
+#include <string.h>
+
 // To use time library of C
 #include <time.h>
 #include "altera_avalon_spi.h"
@@ -284,31 +286,17 @@ uint8_t bitRead(uint8_t x, uint8_t n) {
     return (x >> n) & 0x1;
 }
 
-// disableChip, enableChip -- pass in
-// IRQ ID's after creating the SPI module for the ethernet controller
-void disableChip() {
-  // TODO set slave select to high (it's active low)
-//  alt_ic_irq_disable(SPI_0_IRQ_INTERRUPT_CONTROLLER_ID, SPI_0_IRQ);
-}
-
-// disableChip, enableChip -- pass in
-// IRQ ID's after creating the SPI module for the ethernet controller
-void enableChip() {
-//  alt_ic_irq_enable(SPI_0_IRQ_INTERRUPT_CONTROLLER_ID, SPI_0_IRQ);
-  // TODO set slave select to low (it's active low)
-}
-
 
 // status -- 1 (HIGH), 0 (LOW)
-int digitalWrite(uint8_t whichPin, uint8_t status) {
-  if (status != LOW || status != HIGH) return -1;
-  if (status == HIGH) {
-    *GPIO_PIO |= 1 << whichPin;
-  } else {// status == LOW
-    *GPIO_PIO &= ~(1 << whichPin);
-  }
-  return 0;
-}
+//int digitalWrite(uint8_t whichPin, uint8_t status) {
+//  if (status != LOW || status != HIGH) return -1;
+//  if (status == HIGH) {
+//    *GPIO_PIO |= 1 << whichPin;
+//  } else {// status == LOW
+//    *GPIO_PIO &= ~(1 << whichPin);
+//  }
+//  return 0;
+//}
 
 //static void xferSPI (uint8_t data, uint32_t flags = 0) {
 //  SPDR[0] = data;
@@ -344,47 +332,33 @@ static void writeOp (uint8_t op, uint8_t address, uint8_t data) {
 }
 
 static uint8_t readOp (uint8_t op, uint8_t address) {
-    uint8_t send_data[3];
+    uint8_t send_data[1];
     send_data[0] = op | (address & ADDR_MASK);
-    send_data[1] = 0x00;
-    uint8_t recieve_data_bad[1], recieve_data[1];
-
-//    printf("sending: %x\n", send_data[0]);
+//    uint8_t recieve_data[2];
 
     if (address & 0x80) {
-    	send_data[2] = 0x00;
+    	uint8_t recieve_data[2];
     	alt_avalon_spi_command( SPI_0_BASE,
     							ETHERNET_CHIP_SLAVE,
-    							2, // write one byte
+    							1, // write one byte
     							send_data, // write data
-    							1, // Read one byte
-								recieve_data_bad, // read into SPDR
-    							0); // no flags
-    	alt_avalon_spi_command( SPI_0_BASE,
-    							ETHERNET_CHIP_SLAVE,
-    							2, // write one byte
-    							send_data, // write data
-    							1, // Read one byte
+    							2, // Read one byte
 								recieve_data, // read into SPDR
     							0); // no flags
+    	return recieve_data[1];
     } else {
+    	uint8_t recieve_data[1];
     	alt_avalon_spi_command( SPI_0_BASE,
     							ETHERNET_CHIP_SLAVE,
-    							2, // write one byte
-    							send_data, // write data
-    							1, // Read one byte
-								recieve_data_bad, // read into SPDR
-    							0); // no flags
-    	alt_avalon_spi_command( SPI_0_BASE,
-    							ETHERNET_CHIP_SLAVE,
-    							2, // write one byte
+    							1, // write one byte
     							send_data, // write data
     							1, // Read one byte
 								recieve_data, // read into SPDR
     							0); // no flags
+    	return recieve_data[0];
     }
 
-    return recieve_data[0];
+    return 0;
 }
 
 static void SetBank (uint8_t address) {
@@ -479,7 +453,7 @@ uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
   //   initSPI();
 
   // pinMode(selectPin, OUTPUT);
-  disableChip();
+//  disableChip();
 
   writeOp(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);
   delay(2); // errata B7/2
@@ -509,18 +483,6 @@ uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
 
 	writeRegByte(MAADR5, macaddr[0]);
 	writeRegByte(MAADR4, macaddr[1]);
-	uint8_t send_data[2];
-	send_data[0] = 0x45;
-	send_data[2] = 0x69;
-	alt_avalon_spi_command( SPI_0_BASE,
-							ETHERNET_CHIP_SLAVE,
-							2, // write one byte
-							send_data, // write data
-							0, // Read one byte
-							0, // read into SPDR
-							0); // no flags
-
-
 	writeRegByte(MAADR3, macaddr[2]);
 	writeRegByte(MAADR2, macaddr[3]);
 	writeRegByte(MAADR1, macaddr[4]);
@@ -557,42 +519,37 @@ bool ENC28J60::isLinkUp() {
 
 static void readBuf(uint16_t len, byte* data) {
     if (len != 0) {
-    	uint8_t send_data[1], data_bad[len];
+    	uint8_t send_data[1];
     	send_data[0] = ENC28J60_READ_BUF_MEM;
     	alt_avalon_spi_command( SPI_0_BASE,
     							ETHERNET_CHIP_SLAVE,
     							1, //
 								send_data, // write data
     							len, // Read 8 bytes
-								data_bad, // read into SPDR
+								data, // read into SPDR
     							0); // no flags
-    	alt_avalon_spi_command( SPI_0_BASE,
-    							ETHERNET_CHIP_SLAVE,
-    							1, //
-								send_data, // write data
-    							len, // Read 8 bytes
-    							data, // read into SPDR
-    							0); // no flags
+//    	for(int i = 0; i < len; i++)
+//    		printf("%x (%x), ", data[i], i);
+//    	printf("\n");
     }
 }
 
 // TODO
 static void writeBuf(uint16_t len, const byte* data) {
     if (len != 0) {
-    	uint8_t send_data[1];
+//    	uint8_t send_data[1];
+//    	send_data[0] = ENC28J60_WRITE_BUF_MEM;
+
+    	uint8_t send_data[len + 1];
     	send_data[0] = ENC28J60_WRITE_BUF_MEM;
+    	for(int i = 0; i < len; i++)
+    		send_data[i+1] = data[i];
+//    	memcpy(send_data + 1, data, len);
 
     	alt_avalon_spi_command( SPI_0_BASE,
     							ETHERNET_CHIP_SLAVE,
-    							1, //
+    							len + 1, //
 								send_data, // write data
-    							0, // Read 8 bytes
-    							0, // read into SPDR
-    							ALT_AVALON_SPI_COMMAND_MERGE); // no flags
-    	alt_avalon_spi_command( SPI_0_BASE,
-    							ETHERNET_CHIP_SLAVE,
-								len, //
-								data, // write data
     							0, // Read 8 bytes
     							0, // read into SPDR
     							0); // no flags
@@ -615,7 +572,7 @@ uint16_t ENC28J60::packetReceive() {
 
     uint8_t r = readRegByte(EPKTCNT);
     if (r > 0) {
-    	printf("readregbyte %d\n", r);
+//    	printf("readregbyte %d", r);
         writeReg(ERDPT, gNextPacketPtr);
 
         struct {
@@ -638,6 +595,8 @@ uint16_t ENC28J60::packetReceive() {
         unreleasedPacket = true;
 
         writeOp(ENC28J60_BIT_FIELD_SET, ECON2, ECON2_PKTDEC);
+
+//        printf("len = %d\n", len);
     }
     return len;
 }

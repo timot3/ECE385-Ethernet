@@ -89,7 +89,7 @@ const unsigned char ntpreqhdr[] = { 0xE3,0,4,0xFA,0,1,0,0,0,1 }; //NTP request h
 
 
 void* memcpy_P(void* dest, const void* src, std::size_t count) {
-	memcpy(dest, src, count);
+	return memcpy(dest, src, count);
 }
 
 static void fill_checksum(uint8_t dest, uint8_t off, uint16_t len,uint8_t type) {
@@ -500,8 +500,7 @@ void EtherCard::setGwIp (const uint8_t *gwipaddr) {
     copyIp(gwip, gwipaddr);
 }
 
-void EtherCard::updateBroadcastAddress()
-{
+void EtherCard::updateBroadcastAddress() {
     for(uint8_t i=0; i<IP_LEN; i++)
         broadcastip[i] = myip[i] | ~netmask[i];
 }
@@ -581,6 +580,8 @@ static uint16_t www_client_internal_datafill_cb(uint8_t fd) {
     //     }
     // }
     // return bfill.position();
+
+	return 0;
 }
 
 static uint8_t www_client_internal_result_cb(uint8_t fd, uint8_t statuscode, uint16_t datapos, uint16_t len_of_data) {
@@ -628,6 +629,8 @@ static uint16_t tcp_datafill_cb(uint8_t fd) {
 // #endif
 //     result_fd = 123; // bogus value
 //     return len;
+
+	return 0;
 }
 
 static uint8_t tcp_result_cb(uint8_t fd, uint8_t status, uint16_t datapos, uint16_t datalen) {
@@ -692,14 +695,13 @@ uint16_t EtherCard::packetLoop (uint16_t plen) {
 
 #if ETHERCARD_DHCP
     if(using_dhcp) {
-    	printf("top of packetloop\n");
         ether.DhcpStateMachine(plen);
     }
 #endif
 
     if (plen==0) {
         //Check every 65536 (no-packet) cycles whether we need to retry ARP request for gateway
-        if ((waitgwmac & WGW_INITIAL_ARP || waitgwmac & WGW_REFRESHING) &&
+        if (((waitgwmac & WGW_INITIAL_ARP) || (waitgwmac & WGW_REFRESHING)) &&
                 delaycnt==0 && isLinkUp()) {
             client_arp_whohas(gwip);
             waitgwmac |= WGW_ACCEPT_ARP_REPLY;
@@ -734,7 +736,7 @@ uint16_t EtherCard::packetLoop (uint16_t plen) {
     {   //Service ARP request
         if (gPB[ETH_ARP_OPCODE_L_P]==ETH_ARP_OPCODE_REQ_L_V)
             make_arp_answer_from_request();
-        if (waitgwmac & WGW_ACCEPT_ARP_REPLY && (gPB[ETH_ARP_OPCODE_L_P]==ETH_ARP_OPCODE_REPLY_L_V) && client_store_mac(gwip, gwmacaddr))
+        if ((waitgwmac & WGW_ACCEPT_ARP_REPLY) && (gPB[ETH_ARP_OPCODE_L_P]==ETH_ARP_OPCODE_REPLY_L_V) && client_store_mac(gwip, gwmacaddr))
             waitgwmac = WGW_HAVE_GW_MAC;
         if (!has_dns_mac && waiting_for_dns_mac && client_store_mac(dnsip, destmacaddr)) {
             has_dns_mac = true;

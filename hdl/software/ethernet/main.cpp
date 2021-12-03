@@ -32,11 +32,11 @@ int main() {
   const static uint8_t gw[] = {192,168,0,1};
   const static uint8_t dns[] = {192,168,0,1};
 
-  if(!ether.staticSetup(ip, gw, dns))
-  {
-      // handle failure to configure static IP address (current implementation always returns true!)
-	  printf("pain and suffering");
-  }
+//  if(!ether.staticSetup(ip, gw, dns))
+//  {
+//      // handle failure to configure static IP address (current implementation always returns true!)
+//	  printf("pain and suffering");
+//  }
 
   ether.printIp("IP:  ", ether.myip);
   ether.printIp("GW:  ", ether.gwip);

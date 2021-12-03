@@ -519,7 +519,9 @@ bool ENC28J60::isLinkUp() {
 
 static void readBuf(uint16_t len, byte* data) {
     if (len != 0) {
-    	uint8_t send_data[1];
+//    	alt_irq_context irqc = alt_irq_disable_all();
+//    	alt_irq_disable(1);
+    	uint8_t send_data[1], data2[len];
     	send_data[0] = ENC28J60_READ_BUF_MEM;
     	alt_avalon_spi_command( SPI_0_BASE,
     							ETHERNET_CHIP_SLAVE,
@@ -528,9 +530,21 @@ static void readBuf(uint16_t len, byte* data) {
     							len, // Read 8 bytes
 								data, // read into SPDR
     							0); // no flags
-//    	for(int i = 0; i < len; i++)
-//    		printf("%x (%x), ", data[i], i);
-//    	printf("\n");
+    	alt_avalon_spi_command( SPI_0_BASE,
+    							ETHERNET_CHIP_SLAVE,
+    							1, //
+								send_data, // write data
+    							len, // Read 8 bytes
+								data2, // read into SPDR
+    							0); // no flags
+    	if(len < 10) {
+			for(int i = 0; i < len; i++)
+				printf("%x/%x (%x), ", data[i], data2[i], i);
+			printf("\n");
+    	} else {
+    		printf("packet of len %d\n", len);
+    	}
+//    	alt_irq_enable_all(irqc);
     }
 }
 

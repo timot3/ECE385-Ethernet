@@ -143,14 +143,14 @@ ELF := ethernet.elf
 
 # Paths to C, C++, and assembly source files.
 C_SRCS :=
-CXX_SRCS += EtherCard/EtherCard.cpp
-CXX_SRCS += EtherCard/dhcp.cpp
+CXX_SRCS += main.cpp
 CXX_SRCS += EtherCard/dns.cpp
 CXX_SRCS += EtherCard/enc28j60.cpp
+CXX_SRCS += EtherCard/EtherCard.cpp
 CXX_SRCS += EtherCard/tcpip.cpp
-CXX_SRCS += EtherCard/udpserver.cpp
 CXX_SRCS += EtherCard/webutil.cpp
-CXX_SRCS += main.cpp
+CXX_SRCS += EtherCard/dhcp.cpp
+CXX_SRCS += EtherCard/udpserver.cpp
 ASM_SRCS :=
 
 

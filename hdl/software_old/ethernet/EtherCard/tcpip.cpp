@@ -199,7 +199,6 @@ static void make_tcphead(uint16_t rel_ack_num,uint8_t cp_seq) {
 }
 
 static void make_arp_answer_from_request() {
-    printf("In make arp answer form request\n");
     setMACs(gPB + ETH_SRC_MAC);
     gPB[ETH_ARP_OPCODE_H_P] = ETH_ARP_OPCODE_REPLY_H_V;
     gPB[ETH_ARP_OPCODE_L_P] = ETH_ARP_OPCODE_REPLY_L_V;
@@ -462,7 +461,6 @@ void EtherCard::sendWol (uint8_t *wolmac) {
 
 // make a arp request
 static void client_arp_whohas(uint8_t *ip_we_search) {
-    printf("In client arp whohas\n");
     setMACs(allOnes);
     gPB[ETH_TYPE_H_P] = ETHTYPE_ARP_H_V;
     gPB[ETH_TYPE_L_P] = ETHTYPE_ARP_L_V;

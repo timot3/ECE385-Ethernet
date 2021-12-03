@@ -530,13 +530,13 @@ static void readBuf(uint16_t len, byte* data) {
     							len, // Read 8 bytes
 								data, // read into SPDR
     							0); // no flags
-//    	alt_avalon_spi_command( SPI_0_BASE,
-//    							ETHERNET_CHIP_SLAVE,
-//    							1, //
-//								send_data, // write data
-//    							len, // Read 8 bytes
-//								data2, // read into SPDR
-//    							0); // no flags
+    	alt_avalon_spi_command( SPI_0_BASE,
+    							ETHERNET_CHIP_SLAVE,
+    							1, //
+								send_data, // write data
+    							len, // Read 8 bytes
+								data2, // read into SPDR
+    							0); // no flags
     	if(len < 10) {
 			for(int i = 0; i < len; i++)
 				printf("%x/%x (%x), ", data[i], data2[i], i);
@@ -544,7 +544,6 @@ static void readBuf(uint16_t len, byte* data) {
     	} else {
     		printf("packet of len %d\n", len);
     	}
-    	data += len;
 //    	alt_irq_enable_all(irqc);
     }
 }
@@ -569,7 +568,6 @@ static void writeBuf(uint16_t len, const byte* data) {
     							0, // read into SPDR
     							0); // no flags
 
-    	data += len;
     }
 }
 

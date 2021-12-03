@@ -4,7 +4,7 @@ JedecChain;
 	DefaultMfr(6E);
 
 	P ActionCode(Cfg)
-		Device PartName(10M50DAF484) Path("/media/sf_vm_shared/ECE385-Ethernet/hdl/output_files/") File("lab6.sof") MfrSpec(OpMask(1));
+		Device PartName(10M50DAF484) Path("C:/Users/timot/Desktop/classes/ECE385-Ethernet/hdl/output_files/") File("lab6.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 

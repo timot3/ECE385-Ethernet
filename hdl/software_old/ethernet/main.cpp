@@ -24,32 +24,31 @@ int main() {
   if (ether.begin(sz, (const uint8_t*)mymac, SS) == 0)
     printf("Failed to access Ethernet controller");
 
-////  return 0;
-//   if (!ether.dhcpSetup())
-//     printf("DHCP failed");
+//  return 0;
+   if (!ether.dhcpSetup())
+     printf("DHCP failed");
 
   const static uint8_t ip[] = {192,168,0,220};
   const static uint8_t gw[] = {192,168,0,1};
   const static uint8_t dns[] = {192,168,0,1};
-  const static uint8_t mask[] = {255, 255, 255, 0};
 
-
-  if(!ether.staticSetup(ip, gw, dns, mask)) {
-      // handle failure to configure static IP address (current implementation always returns true!)
-	  printf("pain and suffering");
-  }
+//  if(!ether.staticSetup(ip, gw, dns))
+//  {
+//      // handle failure to configure static IP address (current implementation always returns true!)
+//	  printf("pain and suffering");
+//  }
 
   ether.printIp("IP:  ", ether.myip);
   ether.printIp("GW:  ", ether.gwip);
 
   // use DNS to locate the IP address we want to ping
-//  if (!ether.dnsLookup("www.google.com"))
-//    printf("DNS failed");
+  if (!ether.dnsLookup("www.google.com"))
+    printf("DNS failed");
 
-  ether.hisip[0] = 192;
-  ether.hisip[1] = 168;
-  ether.hisip[2] = 0;
-  ether.hisip[3] = 225;
+//  ether.hisip[0] = 192;
+//  ether.hisip[1] = 168;
+//  ether.hisip[2] = 0;
+//  ether.hisip[3] = 241;
 
   ether.printIp("SRV: ", ether.hisip);
 

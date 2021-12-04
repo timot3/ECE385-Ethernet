@@ -43,13 +43,13 @@ int main() {
   ether.printIp("GW:  ", ether.gwip);
 
   // use DNS to locate the IP address we want to ping
-//  if (!ether.dnsLookup("www.google.com"))
-//    printf("DNS failed");
+  if (!ether.dnsLookup("www.google.com"))
+    printf("DNS failed");
 
-  ether.hisip[0] = 192;
-  ether.hisip[1] = 168;
-  ether.hisip[2] = 0;
-  ether.hisip[3] = 225;
+//  ether.hisip[0] = 192;
+//  ether.hisip[1] = 168;
+//  ether.hisip[2] = 0;
+//  ether.hisip[3] = 124;
 
   ether.printIp("SRV: ", ether.hisip);
 
@@ -60,19 +60,19 @@ int main() {
   time_t prevTime = time(NULL);
 
   while (1) {
-    uint16_t len = ether.packetReceive(); // go receive new packets
-    uint16_t pos = ether.packetLoop(len); // respond to incoming pings
+      uint16_t len = ether.packetReceive(); // go receive new packets
+      uint16_t pos = ether.packetLoop(len); // respond to incoming pings
 
-    // report whenever a reply to our outgoing ping comes back
-    if (len > 0 && ether.packetLoopIcmpCheckReply(ether.hisip))
-      printf("   %.f ms", difftime(time(NULL), prevTime) * 0.001);
+      // report whenever a reply to our outgoing ping comes back
+      if (len > 0 && ether.packetLoopIcmpCheckReply(ether.hisip))
+        printf("   %.f ms\n", (float)(clock() - prevTime));
 
-    // ping a remote server once every few seconds
-    if (difftime(time(NULL), prevTime) >= 5) {
-      ether.printIp("Pinging: ", ether.hisip);
-      prevTime = time(NULL);
-      ether.clientIcmpRequest(ether.hisip);
+      // ping a remote server once every few seconds
+      if (clock() > prevTime + 5000) {
+        ether.printIp("Pinging: ", ether.hisip);
+        prevTime = clock();
+        ether.clientIcmpRequest(ether.hisip);
+      }
     }
-  }
   return 0;
 }

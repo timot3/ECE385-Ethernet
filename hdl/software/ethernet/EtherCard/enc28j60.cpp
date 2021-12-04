@@ -537,13 +537,13 @@ static void readBuf(uint16_t len, byte* data) {
 //    							len, // Read 8 bytes
 //								data2, // read into SPDR
 //    							0); // no flags
-    	if(len < 10) {
-			for(int i = 0; i < len; i++)
-				printf("%x/%x (%x), ", data[i], data2[i], i);
-			printf("\n");
-    	} else {
-    		printf("packet of len %d\n", len);
-    	}
+//    	if(len < 10) {
+//			for(int i = 0; i < len; i++)
+//				printf("%x/%x (%x), ", data[i], data2[i], i);
+//			printf("\n");
+//    	} else {
+//    		printf("packet of len %d\n", len);
+//    	}
     	data += len;
 //    	alt_irq_enable_all(irqc);
     }

@@ -3,6 +3,13 @@
 #include <time.h>
 #include "EtherCard/EtherCard.h"
 
+#include "altera_avalon_spi.h"
+#include "altera_avalon_spi_regs.h"
+#include "altera_avalon_pio_regs.h"
+#include "sys/alt_irq.h"
+
+#define HEX_DIGITS_PIO_BASE 0x11100
+
 
 // ethernet interface mac address, must be unique on the LAN
 static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
@@ -13,6 +20,22 @@ uint8_t Ethernet::buffer[700];
 
 // called when a ping comes in (replies to it are automatic)
 static void gotPinged(uint8_t *ptr) { ether.printIp(">>> ping from: ", ptr); }
+
+void printSignedHex0(signed char value) {
+	unsigned char tens = 0;
+	unsigned char ones = 0;
+	unsigned short int pio_val = IORD_ALTERA_AVALON_PIO_DATA(HEX_DIGITS_PIO_BASE);
+
+	value = value % 100;
+	tens = value / 10;
+	ones = value % 10;
+
+	pio_val &= 0x00FF;
+	pio_val |= (tens << 12);
+	pio_val |= (ones << 8);
+
+	IOWR_ALTERA_AVALON_PIO_DATA(HEX_DIGITS_PIO_BASE, pio_val);
+}
 
 int main() {
   printf("\n[pings]");
@@ -64,11 +87,14 @@ int main() {
       uint16_t pos = ether.packetLoop(len); // respond to incoming pings
 
       // report whenever a reply to our outgoing ping comes back
-      if (len > 0 && ether.packetLoopIcmpCheckReply(ether.hisip))
-        printf("   %.f ms\n", (float)(clock() - prevTime));
+      if (len > 0 && ether.packetLoopIcmpCheckReply(ether.hisip)) {
+    	int pingAmnt = (int)(clock() - prevTime);
+        printf("   %d ms\n", pingAmnt);
+        printSignedHex0(pingAmnt);
+      }
 
       // ping a remote server once every few seconds
-      if (clock() > prevTime + 5000) {
+      if (clock() > prevTime + 2500) {
         ether.printIp("Pinging: ", ether.hisip);
         prevTime = clock();
         ether.clientIcmpRequest(ether.hisip);

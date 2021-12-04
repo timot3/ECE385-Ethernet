@@ -38,13 +38,13 @@ module lab61 (
       ///////// LEDR /////////
       output   [ 9: 0]   LEDR,
 
-//      ///////// HEX /////////
-//      output   [ 7: 0]   HEX0,
-//      output   [ 7: 0]   HEX1,
-//      output   [ 7: 0]   HEX2,
-//      output   [ 7: 0]   HEX3,
-//      output   [ 7: 0]   HEX4,
-//      output   [ 7: 0]   HEX5,
+      ///////// HEX /////////
+      output   [ 7: 0]   HEX0,
+      output   [ 7: 0]   HEX1,
+      output   [ 7: 0]   HEX2,
+      output   [ 7: 0]   HEX3,
+      output   [ 7: 0]   HEX4,
+      output   [ 7: 0]   HEX5,
 
       ///////// SDRAM /////////
       output             DRAM_CLK,
@@ -103,6 +103,26 @@ module lab61 (
 //	assign SPI0_MISO = ARDUINO_IO[12];
 //	logic temp;
 //	assign SPI0_SCLK = 1'b0;
+
+	//HEX drivers to convert numbers to HEX output
+	logic [3:0] hex_num_4, hex_num_3, hex_num_1, hex_num_0; //4 bit input hex digits
+	logic [1:0] signs;
+	logic [1:0] hundreds;
+	HexDriver hex_driver4 (hex_num_4, HEX4[6:0]);
+	assign HEX4[7] = 1'b1;
+	
+	HexDriver hex_driver3 (hex_num_3, HEX3[6:0]);
+	assign HEX3[7] = 1'b1;
+	
+	HexDriver hex_driver1 (hex_num_1, HEX1[6:0]);
+	assign HEX1[7] = 1'b1;
+	
+	HexDriver hex_driver0 (hex_num_0, HEX0[6:0]);
+	assign HEX0[7] = 1'b1;
+	
+	//fill in the hundreds digit as well as the negative sign
+	assign HEX5 = {1'b1, ~signs[1], 3'b111, ~hundreds[1], ~hundreds[1], 1'b1};
+	assign HEX2 = {1'b1, ~signs[0], 3'b111, ~hundreds[0], ~hundreds[0], 1'b1};
 	
 	
 	nios_soc u0 (
@@ -132,8 +152,8 @@ module lab61 (
 
 		//LEDs and GPIO
 		.led_wire_export(LEDR),	
-		.gpio_wire_export(gpio_wire)
-		
+		.gpio_wire_export(gpio_wire),
+		.hex_digits_export({hex_num_4, hex_num_3, hex_num_1, hex_num_0})
 	 );
 
 											 

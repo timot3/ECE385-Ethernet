@@ -39,13 +39,13 @@
 // ------------------------------------------
 // Generation parameters:
 //   output_name:         nios_soc_mm_interconnect_0_rsp_mux
-//   NUM_INPUTS:          10
-//   ARBITRATION_SHARES:  1 1 1 1 1 1 1 1 1 1
+//   NUM_INPUTS:          11
+//   ARBITRATION_SHARES:  1 1 1 1 1 1 1 1 1 1 1
 //   ARBITRATION_SCHEME   "no-arb"
 //   PIPELINE_ARB:        0
 //   PKT_TRANS_LOCK:      68 (arbitration locking enabled)
 //   ST_DATA_W:           106
-//   ST_CHANNEL_W:        10
+//   ST_CHANNEL_W:        11
 // ------------------------------------------
 
 module nios_soc_mm_interconnect_0_rsp_mux
@@ -55,73 +55,80 @@ module nios_soc_mm_interconnect_0_rsp_mux
     // ----------------------
     input                       sink0_valid,
     input [106-1   : 0]  sink0_data,
-    input [10-1: 0]  sink0_channel,
+    input [11-1: 0]  sink0_channel,
     input                       sink0_startofpacket,
     input                       sink0_endofpacket,
     output                      sink0_ready,
 
     input                       sink1_valid,
     input [106-1   : 0]  sink1_data,
-    input [10-1: 0]  sink1_channel,
+    input [11-1: 0]  sink1_channel,
     input                       sink1_startofpacket,
     input                       sink1_endofpacket,
     output                      sink1_ready,
 
     input                       sink2_valid,
     input [106-1   : 0]  sink2_data,
-    input [10-1: 0]  sink2_channel,
+    input [11-1: 0]  sink2_channel,
     input                       sink2_startofpacket,
     input                       sink2_endofpacket,
     output                      sink2_ready,
 
     input                       sink3_valid,
     input [106-1   : 0]  sink3_data,
-    input [10-1: 0]  sink3_channel,
+    input [11-1: 0]  sink3_channel,
     input                       sink3_startofpacket,
     input                       sink3_endofpacket,
     output                      sink3_ready,
 
     input                       sink4_valid,
     input [106-1   : 0]  sink4_data,
-    input [10-1: 0]  sink4_channel,
+    input [11-1: 0]  sink4_channel,
     input                       sink4_startofpacket,
     input                       sink4_endofpacket,
     output                      sink4_ready,
 
     input                       sink5_valid,
     input [106-1   : 0]  sink5_data,
-    input [10-1: 0]  sink5_channel,
+    input [11-1: 0]  sink5_channel,
     input                       sink5_startofpacket,
     input                       sink5_endofpacket,
     output                      sink5_ready,
 
     input                       sink6_valid,
     input [106-1   : 0]  sink6_data,
-    input [10-1: 0]  sink6_channel,
+    input [11-1: 0]  sink6_channel,
     input                       sink6_startofpacket,
     input                       sink6_endofpacket,
     output                      sink6_ready,
 
     input                       sink7_valid,
     input [106-1   : 0]  sink7_data,
-    input [10-1: 0]  sink7_channel,
+    input [11-1: 0]  sink7_channel,
     input                       sink7_startofpacket,
     input                       sink7_endofpacket,
     output                      sink7_ready,
 
     input                       sink8_valid,
     input [106-1   : 0]  sink8_data,
-    input [10-1: 0]  sink8_channel,
+    input [11-1: 0]  sink8_channel,
     input                       sink8_startofpacket,
     input                       sink8_endofpacket,
     output                      sink8_ready,
 
     input                       sink9_valid,
     input [106-1   : 0]  sink9_data,
-    input [10-1: 0]  sink9_channel,
+    input [11-1: 0]  sink9_channel,
     input                       sink9_startofpacket,
     input                       sink9_endofpacket,
     output                      sink9_ready,
+
+    input                       sink10_valid,
+    input [106-1   : 0]  sink10_data,
+    input [11-1: 0]  sink10_channel,
+    input                       sink10_startofpacket,
+    input                       sink10_endofpacket,
+    output                      sink10_ready,
 
 
     // ----------------------
@@ -129,7 +136,7 @@ module nios_soc_mm_interconnect_0_rsp_mux
     // ----------------------
     output                      src_valid,
     output [106-1    : 0] src_data,
-    output [10-1 : 0] src_channel,
+    output [11-1 : 0] src_channel,
     output                      src_startofpacket,
     output                      src_endofpacket,
     input                       src_ready,
@@ -140,12 +147,12 @@ module nios_soc_mm_interconnect_0_rsp_mux
     input clk,
     input reset
 );
-    localparam PAYLOAD_W        = 106 + 10 + 2;
-    localparam NUM_INPUTS       = 10;
+    localparam PAYLOAD_W        = 106 + 11 + 2;
+    localparam NUM_INPUTS       = 11;
     localparam SHARE_COUNTER_W  = 1;
     localparam PIPELINE_ARB     = 0;
     localparam ST_DATA_W        = 106;
-    localparam ST_CHANNEL_W     = 10;
+    localparam ST_CHANNEL_W     = 11;
     localparam PKT_TRANS_LOCK   = 68;
 
     // ------------------------------------------
@@ -171,6 +178,7 @@ module nios_soc_mm_interconnect_0_rsp_mux
     wire [PAYLOAD_W - 1 : 0] sink7_payload;
     wire [PAYLOAD_W - 1 : 0] sink8_payload;
     wire [PAYLOAD_W - 1 : 0] sink9_payload;
+    wire [PAYLOAD_W - 1 : 0] sink10_payload;
 
     assign valid[0] = sink0_valid;
     assign valid[1] = sink1_valid;
@@ -182,6 +190,7 @@ module nios_soc_mm_interconnect_0_rsp_mux
     assign valid[7] = sink7_valid;
     assign valid[8] = sink8_valid;
     assign valid[9] = sink9_valid;
+    assign valid[10] = sink10_valid;
 
 
     // ------------------------------------------
@@ -201,6 +210,7 @@ module nios_soc_mm_interconnect_0_rsp_mux
       lock[7] = sink7_data[68];
       lock[8] = sink8_data[68];
       lock[9] = sink9_data[68];
+      lock[10] = sink10_data[68];
     end
 
     assign last_cycle = src_valid & src_ready & src_endofpacket & ~(|(lock & grant));
@@ -241,6 +251,7 @@ module nios_soc_mm_interconnect_0_rsp_mux
     // 7      |      1       |  0
     // 8      |      1       |  0
     // 9      |      1       |  0
+    // 10      |      1       |  0
      wire [SHARE_COUNTER_W - 1 : 0] share_0 = 1'd0;
      wire [SHARE_COUNTER_W - 1 : 0] share_1 = 1'd0;
      wire [SHARE_COUNTER_W - 1 : 0] share_2 = 1'd0;
@@ -251,6 +262,7 @@ module nios_soc_mm_interconnect_0_rsp_mux
      wire [SHARE_COUNTER_W - 1 : 0] share_7 = 1'd0;
      wire [SHARE_COUNTER_W - 1 : 0] share_8 = 1'd0;
      wire [SHARE_COUNTER_W - 1 : 0] share_9 = 1'd0;
+     wire [SHARE_COUNTER_W - 1 : 0] share_10 = 1'd0;
 
     // ------------------------------------------
     // Choose the share value corresponding to the grant.
@@ -267,7 +279,8 @@ module nios_soc_mm_interconnect_0_rsp_mux
     share_6 & { SHARE_COUNTER_W {next_grant[6]} } |
     share_7 & { SHARE_COUNTER_W {next_grant[7]} } |
     share_8 & { SHARE_COUNTER_W {next_grant[8]} } |
-    share_9 & { SHARE_COUNTER_W {next_grant[9]} };
+    share_9 & { SHARE_COUNTER_W {next_grant[9]} } |
+    share_10 & { SHARE_COUNTER_W {next_grant[10]} };
     end
 
     // ------------------------------------------
@@ -349,11 +362,14 @@ module nios_soc_mm_interconnect_0_rsp_mux
 
     wire final_packet_9 = 1'b1;
 
+    wire final_packet_10 = 1'b1;
+
 
     // ------------------------------------------
     // Concatenate all final_packet signals (wire or reg) into a handy vector.
     // ------------------------------------------
     wire [NUM_INPUTS - 1 : 0] final_packet = {
+    final_packet_10,
     final_packet_9,
     final_packet_8,
     final_packet_7,
@@ -457,6 +473,7 @@ module nios_soc_mm_interconnect_0_rsp_mux
     assign sink7_ready = src_ready && grant[7];
     assign sink8_ready = src_ready && grant[8];
     assign sink9_ready = src_ready && grant[9];
+    assign sink10_ready = src_ready && grant[10];
 
     assign src_valid = |(grant & valid);
 
@@ -471,7 +488,8 @@ module nios_soc_mm_interconnect_0_rsp_mux
       sink6_payload & {PAYLOAD_W {grant[6]} } |
       sink7_payload & {PAYLOAD_W {grant[7]} } |
       sink8_payload & {PAYLOAD_W {grant[8]} } |
-      sink9_payload & {PAYLOAD_W {grant[9]} };
+      sink9_payload & {PAYLOAD_W {grant[9]} } |
+      sink10_payload & {PAYLOAD_W {grant[10]} };
     end
 
     // ------------------------------------------
@@ -498,6 +516,8 @@ module nios_soc_mm_interconnect_0_rsp_mux
     sink8_startofpacket,sink8_endofpacket};
     assign sink9_payload = {sink9_channel,sink9_data,
     sink9_startofpacket,sink9_endofpacket};
+    assign sink10_payload = {sink10_channel,sink10_data,
+    sink10_startofpacket,sink10_endofpacket};
 
     assign {src_channel,src_data,src_startofpacket,src_endofpacket} = src_payload;
 endmodule

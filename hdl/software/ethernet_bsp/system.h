@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'nios_soc'
  * SOPC Builder design path: ../../nios_soc.sopcinfo
  *
- * Generated: Thu Dec 02 20:05:12 CST 2021
+ * Generated: Sat Dec 04 14:10:06 CST 2021
  */
 
 /*
@@ -160,19 +160,19 @@
 #define ALT_NUM_INTERNAL_INTERRUPT_CONTROLLERS 1
 #define ALT_NUM_INTERRUPT_CONTROLLERS 1
 #define ALT_STDERR "/dev/jtag_uart_0"
-#define ALT_STDERR_BASE 0x11138
+#define ALT_STDERR_BASE 0x11158
 #define ALT_STDERR_DEV jtag_uart_0
 #define ALT_STDERR_IS_JTAG_UART
 #define ALT_STDERR_PRESENT
 #define ALT_STDERR_TYPE "altera_avalon_jtag_uart"
 #define ALT_STDIN "/dev/jtag_uart_0"
-#define ALT_STDIN_BASE 0x11138
+#define ALT_STDIN_BASE 0x11158
 #define ALT_STDIN_DEV jtag_uart_0
 #define ALT_STDIN_IS_JTAG_UART
 #define ALT_STDIN_PRESENT
 #define ALT_STDIN_TYPE "altera_avalon_jtag_uart"
 #define ALT_STDOUT "/dev/jtag_uart_0"
-#define ALT_STDOUT_BASE 0x11138
+#define ALT_STDOUT_BASE 0x11158
 #define ALT_STDOUT_DEV jtag_uart_0
 #define ALT_STDOUT_IS_JTAG_UART
 #define ALT_STDOUT_PRESENT
@@ -186,7 +186,7 @@
  */
 
 #define ALT_MODULE_CLASS_gpio altera_avalon_pio
-#define GPIO_BASE 0x110f0
+#define GPIO_BASE 0x11110
 #define GPIO_BIT_CLEARING_EDGE_REGISTER 0
 #define GPIO_BIT_MODIFYING_OUTPUT_REGISTER 0
 #define GPIO_CAPTURE 0
@@ -219,12 +219,39 @@
 
 
 /*
+ * hex_digits_pio configuration
+ *
+ */
+
+#define ALT_MODULE_CLASS_hex_digits_pio altera_avalon_pio
+#define HEX_DIGITS_PIO_BASE 0x11100
+#define HEX_DIGITS_PIO_BIT_CLEARING_EDGE_REGISTER 0
+#define HEX_DIGITS_PIO_BIT_MODIFYING_OUTPUT_REGISTER 0
+#define HEX_DIGITS_PIO_CAPTURE 0
+#define HEX_DIGITS_PIO_DATA_WIDTH 16
+#define HEX_DIGITS_PIO_DO_TEST_BENCH_WIRING 0
+#define HEX_DIGITS_PIO_DRIVEN_SIM_VALUE 0
+#define HEX_DIGITS_PIO_EDGE_TYPE "NONE"
+#define HEX_DIGITS_PIO_FREQ 50000000
+#define HEX_DIGITS_PIO_HAS_IN 0
+#define HEX_DIGITS_PIO_HAS_OUT 1
+#define HEX_DIGITS_PIO_HAS_TRI 0
+#define HEX_DIGITS_PIO_IRQ -1
+#define HEX_DIGITS_PIO_IRQ_INTERRUPT_CONTROLLER_ID -1
+#define HEX_DIGITS_PIO_IRQ_TYPE "NONE"
+#define HEX_DIGITS_PIO_NAME "/dev/hex_digits_pio"
+#define HEX_DIGITS_PIO_RESET_VALUE 0
+#define HEX_DIGITS_PIO_SPAN 16
+#define HEX_DIGITS_PIO_TYPE "altera_avalon_pio"
+
+
+/*
  * jtag_uart_0 configuration
  *
  */
 
 #define ALT_MODULE_CLASS_jtag_uart_0 altera_avalon_jtag_uart
-#define JTAG_UART_0_BASE 0x11138
+#define JTAG_UART_0_BASE 0x11158
 #define JTAG_UART_0_IRQ 2
 #define JTAG_UART_0_IRQ_INTERRUPT_CONTROLLER_ID 0
 #define JTAG_UART_0_NAME "/dev/jtag_uart_0"
@@ -242,7 +269,7 @@
  */
 
 #define ALT_MODULE_CLASS_led altera_avalon_pio
-#define LED_BASE 0x11100
+#define LED_BASE 0x11120
 #define LED_BIT_CLEARING_EDGE_REGISTER 0
 #define LED_BIT_MODIFYING_OUTPUT_REGISTER 0
 #define LED_CAPTURE 0
@@ -337,7 +364,7 @@
  */
 
 #define ALT_MODULE_CLASS_sdram_pll altpll
-#define SDRAM_PLL_BASE 0x11110
+#define SDRAM_PLL_BASE 0x11130
 #define SDRAM_PLL_IRQ -1
 #define SDRAM_PLL_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SDRAM_PLL_NAME "/dev/sdram_pll"
@@ -382,13 +409,13 @@
  */
 
 #define ALT_MODULE_CLASS_sysid_qsys_0 altera_avalon_sysid_qsys
-#define SYSID_QSYS_0_BASE 0x11130
+#define SYSID_QSYS_0_BASE 0x11150
 #define SYSID_QSYS_0_ID 0
 #define SYSID_QSYS_0_IRQ -1
 #define SYSID_QSYS_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_0_NAME "/dev/sysid_qsys_0"
 #define SYSID_QSYS_0_SPAN 8
-#define SYSID_QSYS_0_TIMESTAMP 1638421957
+#define SYSID_QSYS_0_TIMESTAMP 1638647727
 #define SYSID_QSYS_0_TYPE "altera_avalon_sysid_qsys"
 
 

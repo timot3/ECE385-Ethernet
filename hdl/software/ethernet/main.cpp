@@ -273,21 +273,14 @@ const char website[] = "www.google.com";
 // called when the client request is complete
 static void my_callback(byte status, uint16_t off, uint16_t len) {
   printf(">>>\n");
-  Ethernet::buffer[off + 300] = 0;
+  Ethernet::buffer[off + len] = 0;
   printf("status:%d, len:%d\n", status, len);
-  //   for(int i = 0; i < len; i++) {
-  //	  printf("%c", Ethernet::buffer + off + i);
-  //   }
-  //   printf("...\n");
   printf("%s...\n", (const char *)Ethernet::buffer + off);
 }
 
 int main() {
   printf("\n[webClient]\n");
 
-  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
-  //  if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
-  //    printf("Failed to access Ethernet controller\n");
   uint16_t sz = sizeof ether.buffer;
   if (ether.begin(sz, (const uint8_t *)mymac, SS) == 0)
     printf("Failed to access Ethernet controller");

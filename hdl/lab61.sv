@@ -25,7 +25,7 @@
 //					  output	    DRAM_CLK,
 //				  
 //				  );
-//				  
+//			
 module lab61 (
 
       ///////// Clocks /////////
@@ -66,28 +66,6 @@ module lab61 (
 
 );
 				  
-				  // You need to make sure that the port names here are identical to the port names at 
-				  // the interface in lab61_soc.v
-//				  nios_soc m_lab61_soc (.clk_clk(MAX10_CLK1_50),
-//											 .reset_reset_n(KEY[0]), 
-//											 .led_wire_export(LEDR),
-////                                             .switches_wire_export(SW),
-//                                 .key_wire_export(KEY),
-//											//SDRAM
-//											.sdram_clk_clk(DRAM_CLK),                            //clk_sdram.clk
-//											.sdram_wire_addr(DRAM_ADDR),                         //sdram_wire.addr
-//											.sdram_wire_ba(DRAM_BA),                             //.ba
-//											.sdram_wire_cas_n(DRAM_CAS_N),                       //.cas_n
-//											.sdram_wire_cke(DRAM_CKE),                           //.cke
-//											.sdram_wire_cs_n(DRAM_CS_N),                         //.cs_n
-//											.sdram_wire_dq(DRAM_DQ),                             //.dq
-//											.sdram_wire_dqm({DRAM_UDQM,DRAM_LDQM}),              //.dqm
-//											.sdram_wire_ras_n(DRAM_RAS_N),                       //.ras_n
-//											.sdram_wire_we_n(DRAM_WE_N),                         //.we_n
-//											
-//											// gpio
-//											.gpio_wire_export(gpio_wire)
-//											 );
 	logic SPI0_CS_N, SPI0_SCLK, SPI0_MOSI;
 	assign ARDUINO_IO[9] = SPI0_CS_N;
 
@@ -95,14 +73,19 @@ module lab61 (
 	assign ARDUINO_IO[11] = SPI0_MOSI;
 	assign ARDUINO_IO[12] = 1'bZ;
 	assign SPI0_MISO = ARDUINO_IO[12];
+	
+	// 13, 12, 11, ignore
+	// 15, 14 low
+	// 10 -- high
+	// 9 - 1 low
+	// 0 -- ignore
+	assign ARDUINO_IO[15:14] = 2'b0;
+	assign ARDUINO_IO[10] = 1'b1;
+	assign gpio_wire[9:8] = 2'b0;
+	assign gpio_wire[7] = 1'b1;
+	assign gpio_wire[6:1] = 6'b0;
 
-//	assign ARDUINO_IO[9] = 1'b0;
-//	assign ARDUINO_IO[13] = SPI0_SCLK;
-//	assign ARDUINO_IO[11] = SPI0_MOSI;
-//	assign ARDUINO_IO[12] = 1'bZ;
-//	assign SPI0_MISO = ARDUINO_IO[12];
-//	logic temp;
-//	assign SPI0_SCLK = 1'b0;
+
 
 	//HEX drivers to convert numbers to HEX output
 	logic [3:0] hex_num_4, hex_num_3, hex_num_1, hex_num_0; //4 bit input hex digits
@@ -121,6 +104,7 @@ module lab61 (
 	assign HEX0[7] = 1'b1;
 	
 	//fill in the hundreds digit as well as the negative sign
+	// Display ping on hex displays
 	assign HEX5 = {1'b1, ~signs[1], 3'b111, ~hundreds[1], ~hundreds[1], 1'b1};
 	assign HEX2 = {1'b1, ~signs[0], 3'b111, ~hundreds[0], ~hundreds[0], 1'b1};
 	
@@ -152,7 +136,7 @@ module lab61 (
 
 		//LEDs and GPIO
 		.led_wire_export(LEDR),	
-		.gpio_wire_export(gpio_wire),
+//		.gpio_wire_export(),
 		.hex_digits_export({hex_num_4, hex_num_3, hex_num_1, hex_num_0})
 	 );
 

@@ -13,6 +13,7 @@
 
 #include "EtherCard.h"
 #include "net.h"
+//#include "bufferfiller.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -555,35 +556,34 @@ uint8_t EtherCard::clientTcpReq (uint8_t (*result_cb)(uint8_t,uint8_t,uint16_t,u
 }
 
 static uint16_t www_client_internal_datafill_cb(uint8_t fd) {
-    // BufferFiller bfill = EtherCard::tcpOffset();
-    // if (fd==www_fd) {
-    //     if (client_postval == 0) {
-    //         bfill.emit_p(PSTR("GET $F$S HTTP/1.0\r\n"
-    //                           "Host: $F\r\n"
-    //                           "$F\r\n"
-    //                           "\r\n"), client_urlbuf,
-    //                      client_urlbuf_var,
-    //                      client_hoststr, client_additionalheaderline);
-    //     } else {
-    //         const char* ahl = client_additionalheaderline;
-    //         bfill.emit_p(PSTR("POST $F HTTP/1.0\r\n"
-    //                           "Host: $F\r\n"
-    //                           "$F$S"
-    //                           "Accept: */*\r\n"
-    //                           "Content-Length: $D\r\n"
-    //                           "Content-Type: application/x-www-form-urlencoded\r\n"
-    //                           "\r\n"
-    //                           "$S"), client_urlbuf,
-    //                      client_hoststr,
-    //                      ahl != 0 ? ahl : PSTR(""),
-    //                      ahl != 0 ? "\r\n" : "",
-    //                      strlen(client_postval),
-    //                      client_postval);
-    //     }
-    // }
-    // return bfill.position();
-
 	return 0;
+//     BufferFiller bfill = EtherCard::tcpOffset();
+//     if (fd==www_fd) {
+//         if (client_postval == 0) {
+//             bfill.emit_p(PSTR("GET $F$S HTTP/1.0\r\n"
+//                               "Host: $F\r\n"
+//                               "$F\r\n"
+//                               "\r\n"), (char*)client_urlbuf,
+//                          client_urlbuf_var,
+//                          client_hoststr, client_additionalheaderline);
+//         } else {
+//             const char* ahl = client_additionalheaderline;
+//             bfill.emit_p(PSTR("POST $F HTTP/1.0\r\n"
+//                               "Host: $F\r\n"
+//                               "$F$S"
+//                               "Accept: */*\r\n"
+//                               "Content-Length: $D\r\n"
+//                               "Content-Type: application/x-www-form-urlencoded\r\n"
+//                               "\r\n"
+//                               "$S"), (char*)client_urlbuf,
+//                          client_hoststr,
+//                          ahl != 0 ? ahl : PSTR(""),
+//                          ahl != 0 ? "\r\n" : "",
+//                          strlen(client_postval),
+//                          client_postval);
+//         }
+//     }
+//     return bfill.position();
 }
 
 static uint8_t www_client_internal_result_cb(uint8_t fd, uint8_t statuscode, uint16_t datapos, uint16_t len_of_data) {

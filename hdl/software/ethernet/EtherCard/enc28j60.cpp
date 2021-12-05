@@ -423,18 +423,18 @@ static void getMacAddr() {
 		printf("%x, ", arr[i]);
 }
 
-static void doOtherThing() {
-	uint8_t arr[2];
-	arr[0] = readReg(EPKTCNT);
-
-	writeOp(ENC28J60_BIT_FIELD_SET, EPKTCNT, 0x05);
-
-	arr[1] = readReg(EPKTCNT);
-	printf("doOtherThing out: ");
-	for(int i = 0; i < 2; i++)
-		printf("%x, ", arr[i]);
-
-}
+//static void doOtherThing() {
+//	uint8_t arr[2];
+//	arr[0] = readReg(EPKTCNT);
+//
+//	writeOp(ENC28J60_BIT_FIELD_SET, EPKTCNT, 0x05);
+//
+//	arr[1] = readReg(EPKTCNT);
+//	printf("doOtherThing out: ");
+//	for(int i = 0; i < 2; i++)
+//		printf("%x, ", arr[i]);
+//
+//}
 
 uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
                              uint8_t csPin) {

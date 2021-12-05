@@ -151,6 +151,7 @@ CXX_SRCS += EtherCard/tcpip.cpp
 CXX_SRCS += EtherCard/udpserver.cpp
 CXX_SRCS += EtherCard/webutil.cpp
 CXX_SRCS += main.cpp
+CXX_SRCS += EtherCard/bufferfiller.cpp
 ASM_SRCS :=
 
 

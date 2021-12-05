@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="nios_soc" kind="nios_soc" version="1.0" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2021.12.04.19:55:08 -->
+ <!-- 2021.12.05.00:48:28 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1638669308</value>
+  <value>1638686907</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -11571,7 +11571,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TARGETCLOCK</name>
-   <value>1000000u</value>
+   <value>2000000u</value>
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TARGETSSDELAY</name>
@@ -11675,7 +11675,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="targetClockRate">
    <type>long</type>
-   <value>1000000</value>
+   <value>2000000</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -11710,7 +11710,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="actualClockRate">
    <type>double</type>
-   <value>1000000.0</value>
+   <value>1923076.0</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -12387,7 +12387,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMESTAMP</name>
-   <value>1638669308</value>
+   <value>1638686907</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.compatible</name>
@@ -12407,7 +12407,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.dts.params.timestamp</name>
-   <value>1638669308</value>
+   <value>1638686907</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.vendor</name>
@@ -12423,7 +12423,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="timestamp">
    <type>int</type>
-   <value>1638669308</value>
+   <value>1638686907</value>
    <derived>true</derived>
    <enabled>false</enabled>
    <visible>false</visible>

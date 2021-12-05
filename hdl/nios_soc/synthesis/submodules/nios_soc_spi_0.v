@@ -31,7 +31,7 @@
 //ISMASTER: 1
 //DATABITS: 8
 //TARGETCLOCK: 1000000
-//NUMSLAVES: 1
+//NUMSLAVES: 2
 //CPOL: 0
 //CPHA: 0
 //LSBFIRST: 0
@@ -63,7 +63,7 @@ module nios_soc_spi_0 (
 
   output           MOSI;
   output           SCLK;
-  output           SS_n;
+  output  [  1: 0] SS_n;
   output  [ 15: 0] data_to_cpu;
   output           dataavailable;
   output           endofpacket;
@@ -88,7 +88,7 @@ reg              RRDY;
 wire             SCLK;
 reg              SCLK_reg;
 reg              SSO_reg;
-wire             SS_n;
+wire    [  1: 0] SS_n;
 wire             TMT;
 reg              TOE;
 wire             TRDY;
@@ -319,7 +319,7 @@ wire             write_tx_holding;
 
   assign enableSS = transmitting & ~stateZero;
   assign MOSI = shift_reg[7];
-  assign SS_n = (enableSS | SSO_reg) ? ~spi_slave_select_reg : {1 {1'b1} };
+  assign SS_n = (enableSS | SSO_reg) ? ~spi_slave_select_reg : {2 {1'b1} };
   assign SCLK = SCLK_reg;
   // As long as there's an empty spot somewhere,
   //it's safe to write data.

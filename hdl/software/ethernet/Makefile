@@ -142,7 +142,9 @@ ACDS_VERSION := 18.1
 ELF := ethernet.elf
 
 # Paths to C, C++, and assembly source files.
-C_SRCS :=
+C_SRCS += usb_kb/HID.c
+C_SRCS += usb_kb/MAX3421E.c
+C_SRCS += usb_kb/transfer.c
 CXX_SRCS += EtherCard/EtherCard.cpp
 CXX_SRCS += EtherCard/dhcp.cpp
 CXX_SRCS += EtherCard/dns.cpp

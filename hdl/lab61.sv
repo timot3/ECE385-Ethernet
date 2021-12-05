@@ -66,13 +66,21 @@ module lab61 (
 
 );
 				  
-	logic SPI0_CS_N, SPI0_SCLK, SPI0_MOSI;
-	assign ARDUINO_IO[9] = SPI0_CS_N;
+	logic [1:0] SPI0_CS_N;
+	logic SPI0_SCLK, SPI0_MISO, SPI0_MOSI, USB_GPX, USB_IRQ, USB_RST;
+	assign ARDUINO_IO[9] = SPI0_CS_N[0];
 
 	assign ARDUINO_IO[13] = SPI0_SCLK;
 	assign ARDUINO_IO[11] = SPI0_MOSI;
 	assign ARDUINO_IO[12] = 1'bZ;
 	assign SPI0_MISO = ARDUINO_IO[12];
+
+	assign ARDUINO_RESET_N = USB_RST;
+	assign ARDUINO_IO[7] = USB_RST;//USB reset 
+	
+	assign ARDUINO_IO[9] = 1'bZ; 
+	assign USB_IRQ = ARDUINO_IO[9];
+	assign USB_GPX = 1'b0;
 	
 	// 13, 12, 11, ignore
 	// 15, 14 low
@@ -80,7 +88,7 @@ module lab61 (
 	// 9 - 1 low
 	// 0 -- ignore
 	assign ARDUINO_IO[15:14] = 2'b0;
-	assign ARDUINO_IO[10] = 1'b1;
+	assign ARDUINO_IO[10] = SPI0_CS_N[1];
 	assign gpio_wire[9:8] = 2'b0;
 	assign gpio_wire[7] = 1'b1;
 	assign gpio_wire[6:1] = 6'b0;
@@ -128,11 +136,16 @@ module lab61 (
 		.sdram_wire_ras_n(DRAM_RAS_N),                       //.ras_n
 		.sdram_wire_we_n(DRAM_WE_N),                         //.we_n
 
-		//USB SPI	
+		// SPI	
 		.spi0_SS_n(SPI0_CS_N),
 		.spi0_MOSI(SPI0_MOSI),
 		.spi0_MISO(SPI0_MISO),
 		.spi0_SCLK(SPI0_SCLK),
+		
+		// USB
+		.usb_rst_export(USB_RST),
+		.usb_irq_export(USB_IRQ),
+		.usb_gpx_export(USB_GPX),
 
 		//LEDs and GPIO
 		.led_wire_export(LEDR),	

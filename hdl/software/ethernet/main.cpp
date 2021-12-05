@@ -1,14 +1,17 @@
 #include <stdio.h>
 #include <system.h>
 
+// Set to 0 to disable keyboard code
+#define USING_KEYBOARD 1
 
+#include "EtherCard/EtherCard.h"
+#include "altera_avalon_pio_regs.h"
 #include "altera_avalon_spi.h"
 #include "altera_avalon_spi_regs.h"
-#include "altera_avalon_pio_regs.h"
 #include "sys/alt_irq.h"
 #include <time.h>
-#include "EtherCard/EtherCard.h"
 
+#if USING_KEYBOARD
 extern "C" {
 	#include "usb_kb/GenericMacros.h"
 	#include "usb_kb/GenericTypeDefs.h"
@@ -18,116 +21,122 @@ extern "C" {
 	#include "usb_kb/usb_ch9.h"
 	#include "usb_kb/USB.h"
 }
+#endif
 
 // ethernet interface mac addreBss, must be unique on the LAN
 static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
 
-//EtherCard ether;
+// EtherCard ether;
 
 uint8_t Ethernet::buffer[700];
 
+#if USING_KEYBOARD
 extern HID_DEVICE hid_device;
 
-static BYTE addr = 1; 				//hard-wired USB address
-const char* const devclasses[] = { " Uninitialized", " HID Keyboard", " HID Mouse", " Mass storage" };
+static BYTE addr = 1; // hard-wired USB address
+const char *const devclasses[] = {" Uninitialized", " HID Keyboard",
+                                  " HID Mouse", " Mass storage"};
 
 BYTE GetDriverandReport() {
-	BYTE i;
-	BYTE rcode;
-	BYTE device = 0xFF;
-	BYTE tmpbyte;
+  BYTE i;
+  BYTE rcode;
+  BYTE device = 0xFF;
+  BYTE tmpbyte;
 
-	DEV_RECORD* tpl_ptr;
-	printf("Reached USB_STATE_RUNNING (0x40)\n");
-	for (i = 1; i < USB_NUMDEVICES; i++) {
-		tpl_ptr = GetDevtable(i);
-		if (tpl_ptr->epinfo != NULL) {
-			printf("Device: %d", i);
-			printf("%s \n", devclasses[tpl_ptr->devclass]);
-			device = tpl_ptr->devclass;
-		}
-	}
-	//Query rate and protocol
-	rcode = XferGetIdle(addr, 0, hid_device.interface, 0, &tmpbyte);
-	if (rcode) {   //error handling
-		printf("GetIdle Error. Error code: ");
-		printf("%x \n", rcode);
-	} else {
-		printf("Update rate: ");
-		printf("%x \n", tmpbyte);
-	}
-	printf("Protocol: ");
-	rcode = XferGetProto(addr, 0, hid_device.interface, &tmpbyte);
-	if (rcode) {   //error handling
-		printf("GetProto Error. Error code ");
-		printf("%x \n", rcode);
-	} else {
-		printf("%d \n", tmpbyte);
-	}
-	return device;
+  DEV_RECORD *tpl_ptr;
+  printf("Reached USB_STATE_RUNNING (0x40)\n");
+  for (i = 1; i < USB_NUMDEVICES; i++) {
+    tpl_ptr = GetDevtable(i);
+    if (tpl_ptr->epinfo != NULL) {
+      printf("Device: %d", i);
+      printf("%s \n", devclasses[tpl_ptr->devclass]);
+      device = tpl_ptr->devclass;
+    }
+  }
+  // Query rate and protocol
+  rcode = XferGetIdle(addr, 0, hid_device.interface, 0, &tmpbyte);
+  if (rcode) { // error handling
+    printf("GetIdle Error. Error code: ");
+    printf("%x \n", rcode);
+  } else {
+    printf("Update rate: ");
+    printf("%x \n", tmpbyte);
+  }
+  printf("Protocol: ");
+  rcode = XferGetProto(addr, 0, hid_device.interface, &tmpbyte);
+  if (rcode) { // error handling
+    printf("GetProto Error. Error code ");
+    printf("%x \n", rcode);
+  } else {
+    printf("%d \n", tmpbyte);
+  }
+  return device;
 }
 
 void setKeycode(WORD keycode) {
-	IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_BASE, keycode);
+  IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_BASE, keycode);
 }
+#endif
 
 // called when a ping comes in (replies to it are automatic)
 static void gotPinged(uint8_t *ptr) { ether.printIp(">>> ping from: ", ptr); }
 
-
 void printSignedHex0(signed char value) {
-	unsigned char tens = 0;
-	unsigned char ones = 0;
-	unsigned short int pio_val = IORD_ALTERA_AVALON_PIO_DATA(HEX_DIGITS_PIO_BASE);
+  unsigned char tens = 0;
+  unsigned char ones = 0;
+  unsigned short int pio_val = IORD_ALTERA_AVALON_PIO_DATA(HEX_DIGITS_PIO_BASE);
 
-	value = value % 100;
-	tens = value / 10;
-	ones = value % 10;
+  value = value % 100;
+  tens = value / 10;
+  ones = value % 10;
 
-	pio_val &= 0x00FF;
-	pio_val |= (tens << 12);
-	pio_val |= (ones << 8);
+  pio_val &= 0x00FF;
+  pio_val |= (tens << 12);
+  pio_val |= (ones << 8);
 
-	IOWR_ALTERA_AVALON_PIO_DATA(HEX_DIGITS_PIO_BASE, pio_val);
+  IOWR_ALTERA_AVALON_PIO_DATA(HEX_DIGITS_PIO_BASE, pio_val);
 }
 
 int main() {
   printf("\n[pings]");
 
-	BYTE rcode;
-	BOOT_MOUSE_REPORT buf;		//USB mouse report
-	BOOT_KBD_REPORT kbdbuf;
+#if USING_KEYBOARD
 
-	BYTE runningdebugflag = 0;//flag to dump out a bunch of information when we first get to USB_STATE_RUNNING
-	BYTE errorflag = 0; //flag once we get an error device so we don't keep dumping out state info
-	BYTE device;
-	WORD keycode;
+  BYTE rcode;
+  BOOT_MOUSE_REPORT buf; // USB mouse report
+  BOOT_KBD_REPORT kbdbuf;
 
-	printf("initializing MAX3421E...\n");
-	MAX3421E_init();
-	printf("initializing USB...\n");
-	USB_init();
+  BYTE runningdebugflag = 0; // flag to dump out a bunch of information when we
+                             // first get to USB_STATE_RUNNING
+  BYTE errorflag = 0; // flag once we get an error device so we don't keep
+                      // dumping out state info
+  BYTE device;
+  WORD keycode;
 
-
+  printf("initializing MAX3421E...\n");
+  MAX3421E_init();
+  printf("initializing USB...\n");
+  USB_init();
+#endif
 
   uint16_t sz = sizeof ether.buffer;
   printf("Size: %x\n", sz);
-  if (ether.begin(sz, (const uint8_t*)mymac, SS) == 0)
+  if (ether.begin(sz, (const uint8_t *)mymac, SS) == 0)
     printf("Failed to access Ethernet controller");
 
-////  return 0;
-//   if (!ether.dhcpSetup())
-//     printf("DHCP failed");
+  ////  return 0;
+  //   if (!ether.dhcpSetup())
+  //     printf("DHCP failed");
 
-  const static uint8_t ip[] = {192,168,0,220};
-  const static uint8_t gw[] = {192,168,0,1};
-  const static uint8_t dns[] = {192,168,0,1};
+  const static uint8_t ip[] = {192, 168, 0, 220};
+  const static uint8_t gw[] = {192, 168, 0, 1};
+  const static uint8_t dns[] = {192, 168, 0, 1};
   const static uint8_t mask[] = {255, 255, 255, 0};
 
-
-  if(!ether.staticSetup(ip, gw, dns, mask)) {
-      // handle failure to configure static IP address (current implementation always returns true!)
-	  printf("pain and suffering");
+  if (!ether.staticSetup(ip, gw, dns, mask)) {
+    // handle failure to configure static IP address (current implementation
+    // always returns true!)
+    printf("pain and suffering");
   }
 
   ether.printIp("IP:  ", ether.myip);
@@ -136,10 +145,10 @@ int main() {
   // use DNS to locate the IP address we want to ping
   if (!ether.dnsLookup("www.4chan.org"))
     printf("DNS failed");
-//  ether.hisip[0] = 34;
-//  ether.hisip[1] = 222;
-//  ether.hisip[2] = 248;
-//  ether.hisip[3] = 68;
+  //  ether.hisip[0] = 34;
+  //  ether.hisip[1] = 222;
+  //  ether.hisip[2] = 248;
+  //  ether.hisip[3] = 68;
 
   ether.printIp("SRV: ", ether.hisip);
 
@@ -150,104 +159,100 @@ int main() {
   time_t prevTime = time(NULL);
 
   while (1) {
-      uint16_t len = ether.packetReceive(); // go receive new packets
-      uint16_t pos = ether.packetLoop(len); // respond to incoming pings
+    uint16_t len = ether.packetReceive(); // go receive new packets
+    uint16_t pos = ether.packetLoop(len); // respond to incoming pings
 
-      // report whenever a reply to our outgoing ping comes back
-      if (len > 0 && ether.packetLoopIcmpCheckReply(ether.hisip)) {
-    	int pingAmnt = (int)(clock() - prevTime);
-        printf("   %d ms\n", pingAmnt);
-        printSignedHex0(pingAmnt);
-      }
+    // report whenever a reply to our outgoing ping comes back
+    if (len > 0 && ether.packetLoopIcmpCheckReply(ether.hisip)) {
+      int pingAmnt = (int)(clock() - prevTime);
+      printf("   %d ms\n", pingAmnt);
+      printSignedHex0(pingAmnt);
+    }
 
-      // ping a remote server once every few seconds
-      if (clock() > prevTime + 2500) {
-        ether.printIp("Pinging: ", ether.hisip);
-        prevTime = clock();
-        ether.clientIcmpRequest(ether.hisip);
-      }
+    // ping a remote server once every few seconds
+    if (clock() > prevTime + 2500) {
+      ether.printIp("Pinging: ", ether.hisip);
+      prevTime = clock();
+      ether.clientIcmpRequest(ether.hisip);
+    }
 
+    /////////// KB
+#if USING_KEYBOARD
 
-
-      /////////// KB
-
-      printf(".");
-      		MAX3421E_Task();
-      //		printf("STARTING USB TASK\n");
-      		USB_Task();
-      		//usleep (500000);
-      		if (GetUsbTaskState() == USB_STATE_RUNNING) {
+    printf(".");
+    MAX3421E_Task();
+    //		printf("STARTING USB TASK\n");
+    USB_Task();
+    // usleep (500000);
+    if (GetUsbTaskState() == USB_STATE_RUNNING) {
       //			printf("STARTING FIRST IF\n");
-      			if (!runningdebugflag) {
-      //				printf("STARTING SECOND IF\n");
-      				runningdebugflag = 1;
-      //				printf("SET FLAG\n");
-      				printf("SET LED\n");
-      				device = GetDriverandReport();
-      //				printf("END OF IF\n");
-      			} else if (device == 1) {
-      				//run keyboard debug polling
-      				rcode = kbdPoll(&kbdbuf);
-      				if (rcode == hrNAK) {
-      					continue; //NAK means no new data
-      				} else if (rcode) {
-      					printf("Rcode: ");
-      					printf("%x \n", rcode);
-      					continue;
-      				}
-      				printf("keycodes: ");
-      				for (int i = 0; i < 6; i++) {
-      					printf("%x ", kbdbuf.keycode[i]);
+      if (!runningdebugflag) {
+        //				printf("STARTING SECOND IF\n");
+        runningdebugflag = 1;
+        //				printf("SET FLAG\n");
+        printf("SET LED\n");
+        device = GetDriverandReport();
+        //				printf("END OF IF\n");
+      } else if (device == 1) {
+        // run keyboard debug polling
+        rcode = kbdPoll(&kbdbuf);
+        if (rcode == hrNAK) {
+          continue; // NAK means no new data
+        } else if (rcode) {
+          printf("Rcode: ");
+          printf("%x \n", rcode);
+          continue;
+        }
+        printf("keycodes: ");
+        for (int i = 0; i < 6; i++) {
+          printf("%x ", kbdbuf.keycode[i]);
+        }
+        setKeycode(kbdbuf.keycode[0]);
+        printf("\n");
+      }
 
-      				}
-      				setKeycode(kbdbuf.keycode[0]);
-      				printf("\n");
-      			}
+      else if (device == 2) {
+        rcode = mousePoll(&buf);
+        if (rcode == hrNAK) {
+          // NAK means no new data
+          continue;
+        } else if (rcode) {
+          printf("Rcode: ");
+          printf("%x \n", rcode);
+          continue;
+        }
+        printf("X displacement: ");
+        printf("%d ", (signed char)buf.Xdispl);
+        printf("Y displacement: ");
+        printf("%d ", (signed char)buf.Ydispl);
+        printf("Buttons: ");
+        printf("%x\n", buf.button);
+      }
+    } else if (GetUsbTaskState() == USB_STATE_ERROR) {
+      if (!errorflag) {
+        errorflag = 1;
+        printf("USB Error State\n");
+        // print out string descriptor here
+      }
+    } else // not in USB running state
+    {
 
-      			else if (device == 2) {
-      				rcode = mousePoll(&buf);
-      				if (rcode == hrNAK) {
-      					//NAK means no new data
-      					continue;
-      				} else if (rcode) {
-      					printf("Rcode: ");
-      					printf("%x \n", rcode);
-      					continue;
-      				}
-      				printf("X displacement: ");
-      				printf("%d ", (signed char) buf.Xdispl);
-      				printf("Y displacement: ");
-      				printf("%d ", (signed char) buf.Ydispl);
-      				printf("Buttons: ");
-      				printf("%x\n", buf.button);
-      			}
-      		} else if (GetUsbTaskState() == USB_STATE_ERROR) {
-      			if (!errorflag) {
-      				errorflag = 1;
-      				printf("USB Error State\n");
-      				//print out string descriptor here
-      			}
-      		} else //not in USB running state
-      		{
+      printf("USB task state: ");
+      printf("%x\n", GetUsbTaskState());
+      if (runningdebugflag) { // previously running, reset USB hardware just to
+                              // clear out any funky state, HS/FS etc
+        runningdebugflag = 0;
+        MAX3421E_init();
+        USB_init();
+      }
+      errorflag = 0;
+    }
+#endif
 
-      			printf("USB task state: ");
-      			printf("%x\n", GetUsbTaskState());
-      			if (runningdebugflag) {	//previously running, reset USB hardware just to clear out any funky state, HS/FS etc
-      				runningdebugflag = 0;
-      				MAX3421E_init();
-      				USB_init();
-      			}
-      			errorflag = 0;
-      		}
-
-      ///////////
-
+    ///////////
   }
   return 0;
 }
-
-
-
 
 ///////////////////////////////////////////////////////////////////////
 //
@@ -267,26 +272,26 @@ int main() {
 //#include "sys/alt_irq.h"
 //
 //// ethernet interface mac address, must be unique on the LAN
-//static byte mymac[] = { 0x74,0x69,0x69,0x2D,0x30,0x31 };
+// static byte mymac[] = { 0x74,0x69,0x69,0x2D,0x30,0x31 };
 //
-//byte Ethernet::buffer[700];
-//static uint32_t timer;
+// byte Ethernet::buffer[700];
+// static uint32_t timer;
 //
-//const char website[] = "www.google.com";
+// const char website[] = "www.google.com";
 //
 //// called when the client request is complete
-//static void my_callback (byte status, uint16_t off, uint16_t len) {
-//  printf(">>>\n");
-//  Ethernet::buffer[off+300] = 0;
-//  printf("status:%d, len:%d\n", status, len);
-//  for(int i = 0; i < len; i++) {
+// static void my_callback (byte status, uint16_t off, uint16_t len) {
+//   printf(">>>\n");
+//   Ethernet::buffer[off+300] = 0;
+//   printf("status:%d, len:%d\n", status, len);
+//   for(int i = 0; i < len; i++) {
 //	  printf("%c", Ethernet::buffer + off + i);
-//  }
-//  printf("...\n");
+//   }
+//   printf("...\n");
 ////  printf("%s...\n", (const char*) Ethernet::buffer + off);
 //}
 //
-//int main() {
+// int main() {
 //  printf("\n[webClient]\n");
 //
 //  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
@@ -302,7 +307,8 @@ int main() {
 //
 //
 //    if(!ether.staticSetup(ip, gw, dns, mask)) {
-//        // handle failure to configure static IP address (current implementation always returns true!)
+//        // handle failure to configure static IP address (current
+//        implementation always returns true!)
 //  	  printf("pain and suffering");
 //    }
 //

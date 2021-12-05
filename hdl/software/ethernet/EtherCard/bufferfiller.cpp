@@ -2,39 +2,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-// ltoa stolen from the internet (https://gist.github.com/boatilus/11305304)
-
-#define BUFSIZE (sizeof(long) * 8 + 1)
-
-char *ltoa(long N, char *str, int base) {
-  int i = 2;
-  long uarg;
-  char *tail, *head = str, buf[BUFSIZE];
-
-  if (36 < base || 2 > base)
-    base = 10;              /* can only use 0-9, A-Z        */
-  tail = &buf[BUFSIZE - 1]; /* last character position      */
-  *tail-- = '\0';
-
-  if (10 == base && N < 0L) {
-    *head++ = '-';
-    uarg = -N;
-  } else
-    uarg = N;
-
-  if (uarg) {
-    for (i = 1; uarg; ++i) {
-      ldiv_t r;
-      r = ldiv(uarg, base);
-      *tail-- = (char)(r.rem + ((9L < r.rem) ? ('A' - 10L) : '0'));
-      uarg = r.quot;
-    }
-  } else
-    *tail-- = '0';
-
-  memcpy(head, ++tail, i);
-  return str;
-}
+#include <string.h>
 
 void BufferFiller::emit_p(const char *fmt, ...) {
   va_list ap;
@@ -77,7 +45,7 @@ void BufferFiller::emit_p(const char *fmt, ...) {
       continue;
     }
     case 'L':
-      ltoa(va_arg(ap, long), (char *)ptr, 10);
+      itoa(va_arg(ap, long), (char *)ptr, 10);
       break;
     case 'S':
       strcpy((char *)ptr, va_arg(ap, const char *));

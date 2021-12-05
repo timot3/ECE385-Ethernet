@@ -313,13 +313,6 @@ static bool dhcp_received_message_type(uint16_t len, byte msgType) {
   // Map struct onto payload
   DHCPdata *dhcpPtr = (DHCPdata *)(gPB + UDP_DATA_P);
 
-  //    if(len > 0) {
-  //    	printf("len: %d\n", len);
-  //    	for(int i = 0; i < len; i++)
-  //    		printf("%d (%x), ", gPB[i], i);
-  //    	printf("\n");
-  //    }
-
   if (len >= 70 && gPB[UDP_SRC_PORT_L_P] == DHCP_SERVER_PORT &&
       dhcpPtr->xid == currentXid) {
 

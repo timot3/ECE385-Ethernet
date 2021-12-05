@@ -4,9 +4,6 @@
 #define BufferFiller_h
 
 #include "EtherCard.h"
-#include <string.h>
-
-#define memcpy_P memcpy
 
 /** This class populates network send and receive buffers.
  *

@@ -1,12 +1,23 @@
 #include <stdio.h>
 #include <system.h>
-#include <time.h>
-#include "EtherCard/EtherCard.h"
+
 
 #include "altera_avalon_spi.h"
 #include "altera_avalon_spi_regs.h"
 #include "altera_avalon_pio_regs.h"
 #include "sys/alt_irq.h"
+#include <time.h>
+#include "EtherCard/EtherCard.h"
+
+extern "C" {
+	#include "usb_kb/GenericMacros.h"
+	#include "usb_kb/GenericTypeDefs.h"
+	#include "usb_kb/HID.h"
+	#include "usb_kb/MAX3421E.h"
+	#include "usb_kb/transfer.h"
+	#include "usb_kb/usb_ch9.h"
+	#include "usb_kb/USB.h"
+}
 
 // ethernet interface mac addreBss, must be unique on the LAN
 static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
@@ -14,23 +25,6 @@ static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
 //EtherCard ether;
 
 uint8_t Ethernet::buffer[700];
-
-
-
-
-//ECE 385 USB Host Shield code
-//based on Circuits-at-home USB Host code 1.x
-//to be used for ECE 385 course materials
-//Revised October 2020 - Zuofu Cheng
-
-
-#include "usb_kb/GenericMacros.h"
-#include "usb_kb/GenericTypeDefs.h"
-#include "usb_kb/HID.h"
-#include "usb_kb/MAX3421E.h"
-#include "usb_kb/transfer.h"
-#include "usb_kb/usb_ch9.h"
-#include "usb_kb/USB.h"
 
 extern HID_DEVICE hid_device;
 
@@ -73,17 +67,13 @@ BYTE GetDriverandReport() {
 	return device;
 }
 
-void setKeycode(WORD keycode)
-{
+void setKeycode(WORD keycode) {
 	IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_BASE, keycode);
 }
 
-
-
-
-
 // called when a ping comes in (replies to it are automatic)
 static void gotPinged(uint8_t *ptr) { ether.printIp(">>> ping from: ", ptr); }
+
 
 void printSignedHex0(signed char value) {
 	unsigned char tens = 0;
@@ -104,7 +94,6 @@ void printSignedHex0(signed char value) {
 int main() {
   printf("\n[pings]");
 
-
 	BYTE rcode;
 	BOOT_MOUSE_REPORT buf;		//USB mouse report
 	BOOT_KBD_REPORT kbdbuf;
@@ -118,6 +107,8 @@ int main() {
 	MAX3421E_init();
 	printf("initializing USB...\n");
 	USB_init();
+
+
 
   uint16_t sz = sizeof ether.buffer;
   printf("Size: %x\n", sz);
@@ -175,6 +166,10 @@ int main() {
         prevTime = clock();
         ether.clientIcmpRequest(ether.hisip);
       }
+
+
+
+      /////////// KB
 
       printf(".");
       		MAX3421E_Task();
@@ -244,9 +239,13 @@ int main() {
       			}
       			errorflag = 0;
       		}
-    }
+
+      ///////////
+
+  }
   return 0;
 }
+
 
 
 

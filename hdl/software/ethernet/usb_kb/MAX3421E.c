@@ -2,7 +2,7 @@
 
 #define _MAX3421E_C_
 
-#include <system.h>
+#include "system.h"
 #include "stdlib.h"
 #include "stdio.h"
 #include "string.h"
@@ -12,6 +12,8 @@
 #include "altera_avalon_pio_regs.h"
 #include <sys/alt_stdio.h>
 #include <unistd.h>
+
+#define USB_SS 0x01
 
 //variables and data structures
 //External variables
@@ -38,7 +40,7 @@ void MAXreg_wr(BYTE reg, BYTE val) {
     //                        alt_u32 flags)
 	//write reg + 2 via SPI
 	alt_u8 sendData[2] = {reg + 2, val}; 
-	int ret = alt_avalon_spi_command(SPI_0_BASE, 0, 2, sendData, 0, NULL, 0);
+	int ret = alt_avalon_spi_command(SPI_0_BASE, USB_SS, 2, sendData, 0, NULL, 0);
 	//write val via SPI
 	//read return code from SPI peripheral (see Intel documentation) 
 	//if return code < 0 print an error
@@ -59,7 +61,7 @@ BYTE* MAXbytes_wr(BYTE reg, BYTE nbytes, BYTE* data) {
 		sendData[i] = data[i - 1];
 	
 	//write data[n] via SPI, where n goes from 0 to nbytes-1
-	int ret = alt_avalon_spi_command(SPI_0_BASE, 0, nbytes + 1, sendData, 0, NULL, 0);
+	int ret = alt_avalon_spi_command(SPI_0_BASE, USB_SS, nbytes + 1, sendData, 0, NULL, 0);
 	//read return code from SPI peripheral (see Intel documentation) 
 	//if return code < 0  print an error
 	if(ret < 0) {
@@ -80,7 +82,7 @@ BYTE MAXreg_rd(BYTE reg) {
 	alt_u8 readData[1];
 	alt_u8 send[1];
 	send[0] = reg;
-	int ret = alt_avalon_spi_command(SPI_0_BASE, 0, 1, send, 1, readData, 0);
+	int ret = alt_avalon_spi_command(SPI_0_BASE, USB_SS, 1, send, 1, readData, 0);
 	//read val via SPI
 	//read return code from SPI peripheral (see Intel documentation)
 	//if return code < 0 print an error
@@ -103,7 +105,7 @@ BYTE* MAXbytes_rd(BYTE reg, BYTE nbytes, BYTE* data) {
 	//write reg via SPI
 	// alt_u8 readData; 
 	alt_u8 send[1] = {reg};
-	int ret = alt_avalon_spi_command(SPI_0_BASE, 0, 1, send, nbytes, data, 0);
+	int ret = alt_avalon_spi_command(SPI_0_BASE, USB_SS, 1, send, nbytes, data, 0);
 	//read data[n] from SPI, where n goes from 0 to nbytes-1
 	//read return code from SPI peripheral (see Intel documentation)
 	//if return code < 0 print an error

@@ -79,6 +79,6 @@ PLLJ_PLLSPE_INFO.txt
 *.o
 /.metadata
 /RemoteSystemsTempFiles/
-
+**/eclipse_workspace/**
 # Lab submission files
 *.zip

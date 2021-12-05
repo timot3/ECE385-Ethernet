@@ -13,6 +13,7 @@
 
 #include "EtherCard.h"
 #include "net.h"
+//#include "bufferfiller.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -89,7 +90,7 @@ const unsigned char ntpreqhdr[] = { 0xE3,0,4,0xFA,0,1,0,0,0,1 }; //NTP request h
 
 
 void* memcpy_P(void* dest, const void* src, std::size_t count) {
-	memcpy(dest, src, count);
+	return memcpy(dest, src, count);
 }
 
 static void fill_checksum(uint8_t dest, uint8_t off, uint16_t len,uint8_t type) {
@@ -199,6 +200,7 @@ static void make_tcphead(uint16_t rel_ack_num,uint8_t cp_seq) {
 }
 
 static void make_arp_answer_from_request() {
+    printf("In make arp answer form request\n");
     setMACs(gPB + ETH_SRC_MAC);
     gPB[ETH_ARP_OPCODE_H_P] = ETH_ARP_OPCODE_REPLY_H_V;
     gPB[ETH_ARP_OPCODE_L_P] = ETH_ARP_OPCODE_REPLY_L_V;
@@ -461,6 +463,7 @@ void EtherCard::sendWol (uint8_t *wolmac) {
 
 // make a arp request
 static void client_arp_whohas(uint8_t *ip_we_search) {
+    printf("In client arp whohas\n");
     setMACs(allOnes);
     gPB[ETH_TYPE_H_P] = ETHTYPE_ARP_H_V;
     gPB[ETH_TYPE_L_P] = ETHTYPE_ARP_L_V;
@@ -500,8 +503,7 @@ void EtherCard::setGwIp (const uint8_t *gwipaddr) {
     copyIp(gwip, gwipaddr);
 }
 
-void EtherCard::updateBroadcastAddress()
-{
+void EtherCard::updateBroadcastAddress() {
     for(uint8_t i=0; i<IP_LEN; i++)
         broadcastip[i] = myip[i] | ~netmask[i];
 }
@@ -554,33 +556,34 @@ uint8_t EtherCard::clientTcpReq (uint8_t (*result_cb)(uint8_t,uint8_t,uint16_t,u
 }
 
 static uint16_t www_client_internal_datafill_cb(uint8_t fd) {
-    // BufferFiller bfill = EtherCard::tcpOffset();
-    // if (fd==www_fd) {
-    //     if (client_postval == 0) {
-    //         bfill.emit_p(PSTR("GET $F$S HTTP/1.0\r\n"
-    //                           "Host: $F\r\n"
-    //                           "$F\r\n"
-    //                           "\r\n"), client_urlbuf,
-    //                      client_urlbuf_var,
-    //                      client_hoststr, client_additionalheaderline);
-    //     } else {
-    //         const char* ahl = client_additionalheaderline;
-    //         bfill.emit_p(PSTR("POST $F HTTP/1.0\r\n"
-    //                           "Host: $F\r\n"
-    //                           "$F$S"
-    //                           "Accept: */*\r\n"
-    //                           "Content-Length: $D\r\n"
-    //                           "Content-Type: application/x-www-form-urlencoded\r\n"
-    //                           "\r\n"
-    //                           "$S"), client_urlbuf,
-    //                      client_hoststr,
-    //                      ahl != 0 ? ahl : PSTR(""),
-    //                      ahl != 0 ? "\r\n" : "",
-    //                      strlen(client_postval),
-    //                      client_postval);
-    //     }
-    // }
-    // return bfill.position();
+	return 0;
+//     BufferFiller bfill = EtherCard::tcpOffset();
+//     if (fd==www_fd) {
+//         if (client_postval == 0) {
+//             bfill.emit_p(PSTR("GET $F$S HTTP/1.0\r\n"
+//                               "Host: $F\r\n"
+//                               "$F\r\n"
+//                               "\r\n"), (char*)client_urlbuf,
+//                          client_urlbuf_var,
+//                          client_hoststr, client_additionalheaderline);
+//         } else {
+//             const char* ahl = client_additionalheaderline;
+//             bfill.emit_p(PSTR("POST $F HTTP/1.0\r\n"
+//                               "Host: $F\r\n"
+//                               "$F$S"
+//                               "Accept: */*\r\n"
+//                               "Content-Length: $D\r\n"
+//                               "Content-Type: application/x-www-form-urlencoded\r\n"
+//                               "\r\n"
+//                               "$S"), (char*)client_urlbuf,
+//                          client_hoststr,
+//                          ahl != 0 ? ahl : PSTR(""),
+//                          ahl != 0 ? "\r\n" : "",
+//                          strlen(client_postval),
+//                          client_postval);
+//         }
+//     }
+//     return bfill.position();
 }
 
 static uint8_t www_client_internal_result_cb(uint8_t fd, uint8_t statuscode, uint16_t datapos, uint16_t len_of_data) {
@@ -628,6 +631,8 @@ static uint16_t tcp_datafill_cb(uint8_t fd) {
 // #endif
 //     result_fd = 123; // bogus value
 //     return len;
+
+	return 0;
 }
 
 static uint8_t tcp_result_cb(uint8_t fd, uint8_t status, uint16_t datapos, uint16_t datalen) {
@@ -698,7 +703,7 @@ uint16_t EtherCard::packetLoop (uint16_t plen) {
 
     if (plen==0) {
         //Check every 65536 (no-packet) cycles whether we need to retry ARP request for gateway
-        if ((waitgwmac & WGW_INITIAL_ARP || waitgwmac & WGW_REFRESHING) &&
+        if (((waitgwmac & WGW_INITIAL_ARP) || (waitgwmac & WGW_REFRESHING)) &&
                 delaycnt==0 && isLinkUp()) {
             client_arp_whohas(gwip);
             waitgwmac |= WGW_ACCEPT_ARP_REPLY;
@@ -733,7 +738,7 @@ uint16_t EtherCard::packetLoop (uint16_t plen) {
     {   //Service ARP request
         if (gPB[ETH_ARP_OPCODE_L_P]==ETH_ARP_OPCODE_REQ_L_V)
             make_arp_answer_from_request();
-        if (waitgwmac & WGW_ACCEPT_ARP_REPLY && (gPB[ETH_ARP_OPCODE_L_P]==ETH_ARP_OPCODE_REPLY_L_V) && client_store_mac(gwip, gwmacaddr))
+        if ((waitgwmac & WGW_ACCEPT_ARP_REPLY) && (gPB[ETH_ARP_OPCODE_L_P]==ETH_ARP_OPCODE_REPLY_L_V) && client_store_mac(gwip, gwmacaddr))
             waitgwmac = WGW_HAVE_GW_MAC;
         if (!has_dns_mac && waiting_for_dns_mac && client_store_mac(dnsip, destmacaddr)) {
             has_dns_mac = true;

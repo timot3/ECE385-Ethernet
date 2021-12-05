@@ -12,9 +12,8 @@ create_clock -period "50.0 MHz" [get_ports MAX10_CLK2_50]
 
 
 
-
 # SDRAM CLK
-create_generated_clock -source [get_pins { m_lab61_soc|sdram_pll|sd1|pll7|clk[1] }] \
+create_generated_clock -source [get_pins { u0|sdram_pll|sd1|pll7|clk[1] }] \
                       -name clk_dram_ext [get_ports {DRAM_CLK}]
 
 
@@ -50,7 +49,7 @@ set_input_delay -min -clock clk_dram_ext 3.0 [get_ports DRAM_DQ*]
 
 #shift-window
 set_multicycle_path -from [get_clocks {clk_dram_ext}] \
-                    -to [get_clocks { m_lab61_soc|sdram_pll|sd1|pll7|clk[0] }] \
+                    -to [get_clocks { u0|sdram_pll|sd1|pll7|clk[0] }] \
 						  -setup 2
 						  
 #**************************************************************

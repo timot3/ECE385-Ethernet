@@ -1,5 +1,7 @@
 #include "EtherCard.h"
 #include <stdarg.h>
+#include <stdio.h>
+
 
 EtherCard ether;
 
@@ -18,8 +20,40 @@ uint16_t EtherCard::delaycnt = 0; //request gateway ARP lookup
 
 uint8_t EtherCard::begin(const uint16_t size, const uint8_t *macaddr,
                          uint8_t csPin) {
-  using_dhcp = false;
+  using_dhcp = true;
   copyMac(mymac, macaddr);
-  return initialize(size, mymac, csPin);
+  uint8_t ret = initialize(size, mymac, csPin);
+  printf("mymac: ");
+  for(int i = 0; i < 6; i++)
+	  printf("%x, ", mymac[i]);
+  printf("\nfinished init (ret: %x)\n", ret);
+  return ret;
 }
 
+bool EtherCard::staticSetup (const uint8_t* my_ip,
+                             const uint8_t* gw_ip,
+                             const uint8_t* dns_ip,
+                             const uint8_t* mask) {
+    using_dhcp = true;
+
+    if (my_ip != 0)
+        copyIp(myip, my_ip);
+    if (gw_ip != 0)
+        setGwIp(gw_ip);
+    if (dns_ip != 0)
+        copyIp(dnsip, dns_ip);
+    if(mask != 0)
+        copyIp(netmask, mask);
+    updateBroadcastAddress();
+    delaycnt = 0; //request gateway ARP lookup
+    return true;
+}
+
+char* EtherCard::wtoa(uint16_t value, char* ptr)
+{
+    if (value > 9)
+        ptr = wtoa(value / 10, ptr);
+    *ptr = '0' + value % 10;
+    *++ptr = 0;
+    return ptr;
+}

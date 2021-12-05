@@ -17,7 +17,8 @@ module nios_soc (
 	spi0_MISO,
 	spi0_MOSI,
 	spi0_SCLK,
-	spi0_SS_n);	
+	spi0_SS_n,
+	hex_digits_export);	
 
 	input		clk_clk;
 	output	[9:0]	gpio_wire_export;
@@ -37,4 +38,5 @@ module nios_soc (
 	output		spi0_MOSI;
 	output		spi0_SCLK;
 	output		spi0_SS_n;
+	output	[15:0]	hex_digits_export;
 endmodule

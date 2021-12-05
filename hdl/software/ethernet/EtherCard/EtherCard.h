@@ -67,7 +67,7 @@ typedef uint8_t byte;
 *   Setting this to zero means that the program will not accept TCP client
 *   requests. Saves 2 bytes SRAM and 250 bytes flash.
 */
-#define ETHERCARD_TCPSERVER 0
+#define ETHERCARD_TCPSERVER 1
 
 /** Enable UDP server functionality.
 *   If zero UDP server is disabled. It is
@@ -76,7 +76,7 @@ typedef uint8_t byte;
 *   seem to save anything; maybe the linker is then smart enough to optimize the
 *   call away.
 */
-#define ETHERCARD_UDPSERVER 0
+#define ETHERCARD_UDPSERVER 1
 
 /** Enable automatic reply to pings.
 *   Setting to zero means that the program will not automatically answer to
@@ -111,6 +111,9 @@ typedef void (*DhcpOptionCallback)(
 /** This class provides the main interface to a ENC28J60 based network interface card and is the class most users will use.
 *   @note   All TCP/IP client (outgoing) connections are made from source port in range 2816-3071. Do not use these source ports for other purposes.
 */
+
+uint8_t getThing(unsigned char address);
+
 class EtherCard : public Ethernet {
 public:
     static uint8_t mymac[ETH_LEN];  ///< MAC address

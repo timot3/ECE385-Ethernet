@@ -14,7 +14,6 @@
 #include "sys/alt_irq.h"
 #include <time.h>
 
-#if PROG_NUM == 0x00
 #if USING_KEYBOARD
 extern "C" {
   #include "usb_kb/GenericMacros.h"
@@ -27,6 +26,7 @@ extern "C" {
 }
 #endif
 
+#if PROG_NUM == 0x00
 // ethernet interface mac addreBss, must be unique on the LAN
 static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
 

@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "altera_avalon_pio_regs.h": "c",
+        "altera_avalon_spi_regs.h": "c"
+    }
+}

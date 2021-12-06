@@ -82,3 +82,5 @@ PLLJ_PLLSPE_INFO.txt
 **/eclipse_workspace/**
 # Lab submission files
 *.zip
+
+/postServer/node_modules

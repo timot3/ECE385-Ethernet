@@ -50,6 +50,7 @@ public:
     void release ();
 
     void put (char c);
+    void print (char* str);
     char get ();
     uint16_t size ();
 

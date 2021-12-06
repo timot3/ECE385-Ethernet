@@ -123,6 +123,14 @@ void Stash::put (char c) {
     }
 }
 
+void Stash::print (char* str) {
+	int i = 0;
+	while(str[i] != NULL) {
+		put(str[i]);
+		i++;
+	}
+}
+
 char Stash::get () {
     load(READBUF, curr);
     if (curr == last && offs >= bufs[READBUF].tail)

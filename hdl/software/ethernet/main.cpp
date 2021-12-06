@@ -2,10 +2,10 @@
 #include <system.h>
 
 // Set to 0 to disable keyboard code
-#define USING_KEYBOARD 0
+#define USING_KEYBOARD 1
 
-// 0x00 = pinging, 0x01 = fetch data from website, 0x02 = host website
-#define PROG_NUM 0x00
+// 0x00 = pinging, 0x01 = fetch data from website, 0x02 = host website, 0x03 = post request
+#define PROG_NUM 0x03
 
 #include "EtherCard/EtherCard.h"
 #include "altera_avalon_pio_regs.h"
@@ -29,6 +29,7 @@ extern "C" {
 #if PROG_NUM == 0x00
 // ethernet interface mac addreBss, must be unique on the LAN
 static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
+//static char mymac[] = {0x74, 0x00, 0x69, 0x2D, 0x30, 0x31};
 
 uint8_t Ethernet::buffer[700];
 
@@ -480,4 +481,75 @@ int main() {
 
   return 0;
 }
+
+#elif PROG_NUM == 0x03
+
+// Using
+// https://stackoverflow.com/questions/49244535/arduino-uno-post-data-using-enc28j60
+// as reference
+#define REQUEST_RATE 5000 // milliseconds
+#define API_PORT 3080
+
+const char website[] = "192.168.0.124";
+static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
+
+byte Ethernet::buffer[500];
+static long timer;
+
+// called when the client request is complete
+static void my_result_cb(byte status, uint16_t off, uint16_t len) {
+  printf("%d ms\n", (clock() - timer));
+  printf("%s\n", (const char *)Ethernet::buffer + off);
+}
+
+int main() {
+  printf("\n[getStaticIP]\n");
+
+  uint16_t sz = sizeof ether.buffer;
+  printf("Size: %x\n", sz);
+  if (ether.begin(sz, (const uint8_t *)mymac, SS) == 0)
+    printf("Failed to access Ethernet controller");
+
+  const static uint8_t ip[] = {192, 168, 0, 220};
+  const static uint8_t gw[] = {192, 168, 0, 1};
+  const static uint8_t dns[] = {192, 168, 0, 1};
+  const static uint8_t mask[] = {255, 255, 255, 0};
+
+  if (!ether.staticSetup(ip, gw, dns, mask)) {
+    // handle failure to configure static IP address (current implementation
+    // always returns true!)
+    printf("pain and suffering");
+  }
+
+  ether.hisip[0] = 192;
+  ether.hisip[1] = 168;
+  ether.hisip[2] = 0;
+  ether.hisip[3] = 124;
+
+  ether.printIp("My IP: ", ether.myip);
+  ether.printIp("Netmask: ", ether.netmask);
+  ether.printIp("GW IP: ", ether.gwip);
+  ether.printIp("DNS IP: ", ether.dnsip);
+  ether.printIp("SRV: ", ether.hisip);
+
+  ether.hisport = API_PORT;
+
+  timer = -REQUEST_RATE; // start timing out right away
+
+  while (1) {
+    ether.packetLoop(ether.packetReceive());
+
+    if (clock() > timer + REQUEST_RATE) {
+      timer = clock();
+      printf("\n>>> REQ SENDING \n");
+
+      ether.httpPost("/sendCommand", website, "Content-Type: application/json",
+                     "{\"test\": \"from FPGA\"}", my_result_cb);
+      printf("done\n");
+    }
+  }
+
+  return 0;
+}
+
 #endif

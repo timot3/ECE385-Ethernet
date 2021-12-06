@@ -7,21 +7,10 @@ const app = express(),
       port = 3080;
 var net = require('net');
 
-var lastSentTime = new Date();
-
 app.use(bodyParser.json());
-
 
 app.post('/sendCommand', (req, res) => {
   console.log("COMMAND: " + req.body.test);
-
-  // Only send commands every 250ms
-  let currTime = new Date();
-  if(currTime - lastSentTime > 250) {
-    lastSentTime = currTime;
-  }
-
-  res.json({connection: "Sent"})
 });
 
 app.listen(port, () => {

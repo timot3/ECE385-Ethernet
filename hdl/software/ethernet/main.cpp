@@ -2,10 +2,10 @@
 #include <system.h>
 
 // Set to 0 to disable keyboard code
-#define USING_KEYBOARD 1
+#define USING_KEYBOARD 0
 
 // 0x00 = pinging, 0x01 = fetch data from website, 0x02 = host website
-#define PROG_NUM 0x02
+#define PROG_NUM 0x00
 
 #include "EtherCard/EtherCard.h"
 #include "altera_avalon_pio_regs.h"
@@ -29,8 +29,6 @@ extern "C" {
 #if PROG_NUM == 0x00
 // ethernet interface mac addreBss, must be unique on the LAN
 static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
-
-// EtherCard ether;
 
 uint8_t Ethernet::buffer[700];
 
@@ -128,19 +126,19 @@ int main() {
     printf("Failed to access Ethernet controller");
 
   ////  return 0;
-  //       if (!ether.dhcpSetup())
-  //         printf("DHCP failed");
+  if (!ether.dhcpSetup())
+    printf("DHCP failed");
 
   const static uint8_t ip[] = {192, 168, 0, 220};
   const static uint8_t gw[] = {192, 168, 0, 1};
   const static uint8_t dns[] = {192, 168, 0, 1};
   const static uint8_t mask[] = {255, 255, 255, 0};
 
-  if (!ether.staticSetup(ip, gw, dns, mask)) {
-    // handle failure to configure static IP address (current implementation
-    // always returns true!)
-    printf("pain and suffering");
-  }
+//  if (!ether.staticSetup(ip, gw, dns, mask)) {
+//    // handle failure to configure static IP address (current implementation
+//    // always returns true!)
+//    printf("pain and suffering");
+//  }
 
   ether.printIp("IP:  ", ether.myip);
   ether.printIp("GW:  ", ether.gwip);

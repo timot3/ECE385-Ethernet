@@ -453,8 +453,7 @@ uint16_t ENC28J60::packetReceive() {
     unreleasedPacket = false;
   }
 
-  uint8_t r = readRegByte(EPKTCNT);
-  if (r > 0) {
+  if (readRegByte(EPKTCNT) > 0) {
     writeReg(ERDPT, gNextPacketPtr);
 
     struct {
@@ -478,7 +477,6 @@ uint16_t ENC28J60::packetReceive() {
 
     writeOp(ENC28J60_BIT_FIELD_SET, ECON2, ECON2_PKTDEC);
   }
-
   return len;
 }
 

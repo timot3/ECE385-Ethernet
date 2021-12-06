@@ -77,7 +77,7 @@ enum {
  */
 
 // size 236
-typedef struct {
+typedef struct __attribute__((packed)) {
   byte op, htype, hlen, hops;
   uint32_t xid;
   uint16_t secs, flags;
@@ -100,7 +100,7 @@ typedef struct {
 
 static byte dhcpState = DHCP_STATE_INIT;
 static char hostname[DHCP_HOSTNAME_MAX_LEN] =
-    "Arduino-ENC28j60-00"; // Last two characters will be filled by last 2 MAC
+    "DE10Lite-ENC28j60-00"; // Last two characters will be filled by last 2 MAC
                            // digits ;
 static uint32_t currentXid;
 static uint32_t stateTimer;
@@ -270,40 +270,40 @@ static void process_dhcp_ack(uint16_t len) {
     byte option = *ptr++;
     byte optionLen = *ptr++;
     switch (option) {
-    case DHCP_OPT_SUBNET_MASK:
-      EtherCard::copyIp(EtherCard::netmask, ptr);
-      break;
-    case DHCP_OPT_ROUTERS:
-      EtherCard::copyIp(EtherCard::gwip, ptr);
-      break;
-    case DHCP_OPT_DOMAIN_NAME_SERVERS:
-      EtherCard::copyIp(EtherCard::dnsip, ptr);
-      break;
-    case DHCP_OPT_LEASE_TIME:
-    case DHCP_OPT_RENEWAL_TIME:
-      leaseTime = 0;
-      for (byte i = 0; i < 4; i++)
-        leaseTime = (leaseTime << 8) + ptr[i];
-      if (leaseTime != DHCP_INFINITE_LEASE) {
-        leaseTime *= 1000; // milliseconds
-      }
-      break;
-    case DHCP_OPT_END:
-      done = true;
-      break;
-    default: {
-      // Is is a custom configured option?
-      if (dhcpCustomOptionList) {
-        uint8_t *p = dhcpCustomOptionList;
-        while (*p != 0) {
-          if (option == *p) {
-            dhcpCustomOptionCallback(option, ptr, optionLen);
-            break;
+      case DHCP_OPT_SUBNET_MASK:
+        EtherCard::copyIp(EtherCard::netmask, ptr);
+        break;
+      case DHCP_OPT_ROUTERS:
+        EtherCard::copyIp(EtherCard::gwip, ptr);
+        break;
+      case DHCP_OPT_DOMAIN_NAME_SERVERS:
+        EtherCard::copyIp(EtherCard::dnsip, ptr);
+        break;
+      case DHCP_OPT_LEASE_TIME:
+      case DHCP_OPT_RENEWAL_TIME:
+        leaseTime = 0;
+        for (byte i = 0; i < 4; i++)
+          leaseTime = (leaseTime << 8) + ptr[i];
+        if (leaseTime != DHCP_INFINITE_LEASE) {
+          leaseTime *= 1000; // milliseconds
+        }
+        break;
+      case DHCP_OPT_END:
+        done = true;
+        break;
+      default: {
+        // Is is a custom configured option?
+        if (dhcpCustomOptionList) {
+          uint8_t *p = dhcpCustomOptionList;
+          while (*p != 0) {
+            if (option == *p) {
+              dhcpCustomOptionCallback(option, ptr, optionLen);
+              break;
+            }
+            p++;
           }
-          p++;
         }
       }
-    }
     }
     ptr += optionLen;
   } while (!done && ptr < gPB + len);

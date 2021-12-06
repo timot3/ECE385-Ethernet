@@ -326,7 +326,7 @@ int main() {
 static byte mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
 static byte myip[] = {192, 168, 0, 220};
 
-byte Ethernet::buffer[500];
+byte Ethernet::buffer[2000];
 BufferFiller bfill;
 char keyPressedArr[50];
 int locInArr = 0;
@@ -388,14 +388,16 @@ static uint16_t homePage() {
   byte s = t % 60;
   bfill = ether.tcpOffset();
   bfill.emit_p("HTTP/1.0 200 OK\r\n"
-               "Content-Type: text/html\r\n"
-               "Pragma: no-cache\r\n"
-               "\r\n"
-               "<meta http-equiv='refresh' content='1'/>"
-               "<title>RBBB server</title>"
-               "<h1>$D$D:$D$D:$D$D</h1>"
-               "<h3>last 50 keys pressed: $S$</h3>",
-               h / 10, h % 10, m / 10, m % 10, s / 10, s % 10, keyPressedArr);
+                "Content-Type: text/html\r\n"
+                "Pragma: no-cache\r\n"
+                "\r\n"
+                "<meta http-equiv='refresh' content='10'/>"
+                "<title>ECE 385 FPGA Server</title>"
+                "<h1>Uptime $D$D:$D$D:$D$D</h1>"
+                "<h3>last 50 keys pressed: $S$</h3>"
+                "<p>(auto refresh every 10s)</p>",
+                h / 10, h % 10, m / 10, m % 10, s / 10, s % 10, keyPressedArr);
+
   return bfill.position();
 }
 

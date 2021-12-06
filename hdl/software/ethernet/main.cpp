@@ -393,9 +393,12 @@ static uint16_t homePage() {
                 "\r\n"
                 "<meta http-equiv='refresh' content='10'/>"
                 "<title>ECE 385 FPGA Server</title>"
-                "<h1>Uptime $D$D:$D$D:$D$D</h1>"
+                "<center><h1>Uptime $D$D:$D$D:$D$D</h1>"
                 "<h3>last 50 keys pressed: $S$</h3>"
-                "<p>(auto refresh every 10s)</p>",
+                "<br><br>"
+                "<p>ECE 385 FA21 Final Project - Ethernet on DE10-Lite</p>"
+                "<p>Hassan Farooq, Tim Vitkin</p>"
+                "<p><small>(auto refresh every 10s)</small></p></center>",
                 h / 10, h % 10, m / 10, m % 10, s / 10, s % 10, keyPressedArr);
 
   return bfill.position();

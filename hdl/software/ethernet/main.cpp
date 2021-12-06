@@ -328,7 +328,8 @@ static byte myip[] = {192, 168, 0, 220};
 
 byte Ethernet::buffer[500];
 BufferFiller bfill;
-uint8_t lastKeyPressed = 0x00;
+char keyPressedArr[50];
+int locInArr = 0;
 
 #if USING_KEYBOARD
 extern HID_DEVICE hid_device;
@@ -336,6 +337,8 @@ extern HID_DEVICE hid_device;
 static BYTE addr = 1; // hard-wired USB address
 const char *const devclasses[] = {" Uninitialized", " HID Keyboard",
                                   " HID Mouse", " Mass storage"};
+
+static char chars[57] = {'0','0','0','0','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0','\n','0','\b','\t',' ','-','=','[',']','\\','0',';','\'','`',',','.'};
 
 BYTE GetDriverandReport() {
   BYTE i;
@@ -391,8 +394,8 @@ static uint16_t homePage() {
                "<meta http-equiv='refresh' content='1'/>"
                "<title>RBBB server</title>"
                "<h1>$D$D:$D$D:$D$D</h1>"
-               "<h3>last key pressed: $D$</h3>",
-               h / 10, h % 10, m / 10, m % 10, s / 10, s % 10, lastKeyPressed);
+               "<h3>last 50 keys pressed: $S$</h3>",
+               h / 10, h % 10, m / 10, m % 10, s / 10, s % 10, keyPressedArr);
   return bfill.position();
 }
 
@@ -443,8 +446,11 @@ int main() {
           continue;
         }
 
-        if (kbdbuf.keycode[0] != 0)
-          lastKeyPressed = kbdbuf.keycode[0];
+        if (kbdbuf.keycode[0] > 0 && kbdbuf.keycode[0] < 57) {
+        	keyPressedArr[locInArr] = chars[kbdbuf.keycode[0]];
+        	locInArr++;
+        	locInArr %= 50;
+        }
 
         setKeycode(kbdbuf.keycode[0]);
       }

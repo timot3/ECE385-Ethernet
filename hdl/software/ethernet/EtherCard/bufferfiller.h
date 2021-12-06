@@ -18,12 +18,13 @@
  *   | Format | Parameter   | Output
  *   |--------|-------------|----------
  *   | $D     | uint16_t    | Decimal representation
- *   | $T ¤   | double      | Decimal representation with 3 digits after decimal
- * sign ([-]d.ddd) | $H     | uint16_t    | Hexadecimal value of lsb (from 00 to
- * ff) | $L     | long        | Decimal representation | $S     | const char* |
- * Copy null terminated string from main memory | $F     | PGM_P       | Copy
- * null terminated string from program space | $E     | byte*       | Copy null
- * terminated string from EEPROM space | $$     | _none_      | '$'
+ *   | $T ¤   | double      | Decimal representation with 3 digits after decimal sign ([-]d.ddd)
+ *   | $H     | uint16_t    | Hexadecimal value of lsb (from 00 to ff)
+ *   | $L     | long        | Decimal representation
+ *   | $S     | const char* | Copy null terminated string from main memory
+ *   | $F     | PGM_P       | Copy null terminated string from program space
+ *   | $E     | byte*       | Copy null terminated string from EEPROM space
+ *   | $$     | _none_      | '$'
  *
  *   ¤ _Available only if FLOATEMIT is defined_
  *

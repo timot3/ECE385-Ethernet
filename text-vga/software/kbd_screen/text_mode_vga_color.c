@@ -143,6 +143,13 @@ void textVGADrawColorText(char* str, int x, int y, alt_u8 background, alt_u8 for
 	}
 }
 
+
+void textVGADrawLetter(char c, int x, int y)
+{
+	vga_ctrl->VRAM[(y*COLUMNS + x ) * 2] = WHITE_COLOR << 4 | BLACK_COLOR;
+	vga_ctrl->VRAM[(y*COLUMNS + x ) * 2 + 1] = c;
+}
+
 void setColorPalette (alt_u8 color, alt_u8 red, alt_u8 green, alt_u8 blue)
 {
     //fill in this function to set the color palette starting at offset 0x0000 2000 (from base)

@@ -146,11 +146,16 @@ static struct COLOR colors[]={
 	{"white",          0xf, 0xf, 0xf}
 };
 void textDraw(char* str);
+
+void textVGADrawLetter(char c, int x, int y);
+
 void textVGAColorClr();
 void textVGADrawColorText(char* str, int x, int y, alt_u8 background, alt_u8 foreground);
 void setColorPalette (alt_u8 color, alt_u8 red, alt_u8 green, alt_u8 blue); //Fill in this code
 
 void textVGAColorScreenSaver(); //Call this for your demo
+
+
 
 
 #endif /* TEXT_MODE_VGA_COLOR_H_ */

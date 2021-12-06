@@ -25,10 +25,10 @@
 #include "text_mode_vga_color.h"
 
 
-static char chars[57] = {'0','0','0','0','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0','\n','0','\b','\t',' ','-','=','[',']','\\','0',';','\'','`',',','.'};
+static char chars[57] = {' ',' ',' ',' ','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0','\n','0','\b','\t',' ','-','=','[',']','\\','0',';','\'','`',',','.'};
 
 char kbd_buf[BUF_LEN];
-int buf_pos;
+int buf_x, buf_y;
 
 extern HID_DEVICE hid_device;
 
@@ -141,10 +141,20 @@ void printSignedHex1(signed char value) {
 
 void setKeycode(WORD keycode)
 {
-	kbd_buf[buf_pos++] = chars[keycode];
-	if (buf_pos >= BUF_LEN) buf_pos = 0;
+
 	IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_BASE, keycode);
-	textDraw(kbd_buf);
+}
+void handleKeypress(WORD keycode) {
+	if (keycode != 0) {
+		printf("Keycode: %d, x: %d, y: %d", keycode, buf_x, buf_y);
+		kbd_buf[buf_x ] = chars[keycode];
+		textVGADrawLetter(kbd_buf[buf_x], buf_x, buf_y);
+		buf_x++;
+		if (buf_x >= BUF_LEN) {
+			buf_x %= BUF_LEN;
+			buf_y++;
+		}
+	}
 }
 int main() {
 	BYTE rcode;
@@ -160,7 +170,8 @@ int main() {
 //		printf("%d\n", i);
 //	}
 	// clear kbd buf
-	buf_pos = 0;
+	buf_x = 0;
+	buf_y = 0;
 	for (int i = 0; i < 20; i++) {
 		kbd_buf[i] = ' ';
 	}
@@ -203,6 +214,7 @@ int main() {
 				}
 
 				setKeycode(kbdbuf.keycode[0]);
+				handleKeypress(kbdbuf.keycode[0]);
 				printSignedHex0(kbdbuf.keycode[0]);
 				printSignedHex1(kbdbuf.keycode[1]);
 				printf("\n");

@@ -2,19 +2,16 @@
 #include "enc28j60.h"
 
 #include <system.h>
-//#include <stdio.h>
-//#include <stdlib.h>
-
 #include <stdio.h>
 #include <string.h>
 
 // To use time library of C
-#include <time.h>
+#include "altera_avalon_pio_regs.h"
 #include "altera_avalon_spi.h"
 #include "altera_avalon_spi_regs.h"
-#include "altera_avalon_pio_regs.h"
-#include <sys/alt_stdio.h>
 #include <sys/alt_irq.h>
+#include <sys/alt_stdio.h>
+#include <time.h>
 uint16_t ENC28J60::bufferSize;
 bool ENC28J60::broadcast_enabled = false;
 bool ENC28J60::promiscuous_enabled = false;
@@ -233,13 +230,10 @@ bool ENC28J60::promiscuous_enabled = false;
 
 #define ETHERNET_CHIP_SLAVE 0
 
-volatile unsigned int *GPIO_PIO = (unsigned int*) GPIO_BASE;
-//uint8_t SPDR[1];
+#define bitRead(value, bit) (((value) >> (bit)) & 0x01)
 
 static uint8_t Enc28j60Bank;
 static uint8_t selectPin; // slave select
-
-
 
 /*
 struct __attribute__((__packed__)) transmit_status_vector {
@@ -267,193 +261,105 @@ struct __attribute__((__packed__)) transmit_status_vector {
 */
 
 struct transmit_status_vector {
-    uint8_t bytes[7];
+  uint8_t bytes[7];
 };
 
-void delay(int milli_seconds)
-{
-    // Converting time into milli_seconds
-    // Storing start time
-    clock_t start_time = clock();
+void delay(int milli_seconds) {
+  // Converting time into milli_seconds
+  // Storing start time
+  clock_t start_time = clock();
 
-    // looping till required time is not achieved
-    while (clock() < start_time + milli_seconds)
-        ;
+  // looping till required time is not achieved
+  while (clock() < start_time + milli_seconds)
+    ;
 }
 
-// Returns nth bit of x
-uint8_t bitRead(uint8_t x, uint8_t n) {
-    return (x >> n) & 0x1;
+static void writeOp(uint8_t op, uint8_t address, uint8_t data) {
+  uint8_t send_data[2];
+  send_data[0] = op | (address & ADDR_MASK);
+  send_data[1] = data;
+  alt_avalon_spi_command(SPI_0_BASE, ETHERNET_CHIP_SLAVE,
+                         2,         // write one byte
+                         send_data, // write data
+                         0,         // Read one byte
+                         0,         // read into SPDR
+                         0);        // no flags
 }
 
+static uint8_t readOp(uint8_t op, uint8_t address) {
+  uint8_t send_data[1];
+  send_data[0] = op | (address & ADDR_MASK);
 
-// status -- 1 (HIGH), 0 (LOW)
-//int digitalWrite(uint8_t whichPin, uint8_t status) {
-//  if (status != LOW || status != HIGH) return -1;
-//  if (status == HIGH) {
-//    *GPIO_PIO |= 1 << whichPin;
-//  } else {// status == LOW
-//    *GPIO_PIO &= ~(1 << whichPin);
-//  }
-//  return 0;
-//}
+  if (address & 0x80) {
+    uint8_t recieve_data[2];
+    alt_avalon_spi_command(SPI_0_BASE, ETHERNET_CHIP_SLAVE,
+                           1,            // write one byte
+                           send_data,    // write data
+                           2,            // Read one byte
+                           recieve_data, // read into SPDR
+                           0);           // no flags
+    return recieve_data[1];
+  } else {
+    uint8_t recieve_data[1];
+    alt_avalon_spi_command(SPI_0_BASE, ETHERNET_CHIP_SLAVE,
+                           1,            // write one byte
+                           send_data,    // write data
+                           1,            // Read one byte
+                           recieve_data, // read into SPDR
+                           0);           // no flags
+    return recieve_data[0];
+  }
 
-//static void xferSPI (uint8_t data, uint32_t flags = 0) {
-//  SPDR[0] = data;
-//  uint8_t write_data[1] = {data};
-//		// int alt_avalon_spi_command(alt_u32 base, alt_u32 slave,
-//    //                         alt_u32 write_length,
-//    //                        const alt_u8* wdata,
-//    //                        alt_u32 read_length,
-//    //                        alt_u8* read_data,
-//    //                        alt_u32 flags)
-//
-//    alt_avalon_spi_command( SPI_0_BASE,
-//                            ETHERNET_CHIP_SLAVE,
-//                            1, // write one byte
-//                            write_data, // write data
-//                            1, // Read one byte
-//                            SPDR, // read into SPDR
-//                            flags); // no flags
-//    printf("spdr: (%d) %x", flags, SPDR[0]);
-//}
-
-static void writeOp (uint8_t op, uint8_t address, uint8_t data) {
-    uint8_t send_data[2];
-    send_data[0] = op | (address & ADDR_MASK);
-    send_data[1] = data;
-	alt_avalon_spi_command( SPI_0_BASE,
-							ETHERNET_CHIP_SLAVE,
-							2, // write one byte
-							send_data, // write data
-							0, // Read one byte
-							0, // read into SPDR
-							0); // no flags
+  return 0;
 }
 
-static uint8_t readOp (uint8_t op, uint8_t address) {
-    uint8_t send_data[1];
-    send_data[0] = op | (address & ADDR_MASK);
-//    uint8_t recieve_data[2];
-
-    if (address & 0x80) {
-    	uint8_t recieve_data[2];
-    	alt_avalon_spi_command( SPI_0_BASE,
-    							ETHERNET_CHIP_SLAVE,
-    							1, // write one byte
-    							send_data, // write data
-    							2, // Read one byte
-								recieve_data, // read into SPDR
-    							0); // no flags
-    	return recieve_data[1];
-    } else {
-    	uint8_t recieve_data[1];
-    	alt_avalon_spi_command( SPI_0_BASE,
-    							ETHERNET_CHIP_SLAVE,
-    							1, // write one byte
-    							send_data, // write data
-    							1, // Read one byte
-								recieve_data, // read into SPDR
-    							0); // no flags
-    	return recieve_data[0];
-    }
-
-    return 0;
+static void SetBank(uint8_t address) {
+  if ((address & BANK_MASK) != Enc28j60Bank) {
+    writeOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_BSEL1 | ECON1_BSEL0);
+    Enc28j60Bank = address & BANK_MASK;
+    writeOp(ENC28J60_BIT_FIELD_SET, ECON1, Enc28j60Bank >> 5);
+  }
 }
 
-static void SetBank (uint8_t address) {
-    if ((address & BANK_MASK) != Enc28j60Bank) {
-        writeOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_BSEL1|ECON1_BSEL0);
-        Enc28j60Bank = address & BANK_MASK;
-//        printf("bank: %x\n", Enc28j60Bank);
-        writeOp(ENC28J60_BIT_FIELD_SET, ECON1, Enc28j60Bank>>5);
-    }
-}
-
-static void writeRegByte (uint8_t address, uint8_t data) {
-    SetBank(address);
-    writeOp(ENC28J60_WRITE_CTRL_REG, address, data);
+static void writeRegByte(uint8_t address, uint8_t data) {
+  SetBank(address);
+  writeOp(ENC28J60_WRITE_CTRL_REG, address, data);
 }
 
 static void writeReg(uint8_t address, uint16_t data) {
-    writeRegByte(address, data);
-    writeRegByte(address + 1, data >> 8);
+  writeRegByte(address, data);
+  writeRegByte(address + 1, data >> 8);
 }
 
-static uint8_t readRegByte (uint8_t address) {
-    SetBank(address);
-    return readOp(ENC28J60_READ_CTRL_REG, address);
+static uint8_t readRegByte(uint8_t address) {
+  SetBank(address);
+  return readOp(ENC28J60_READ_CTRL_REG, address);
 }
 
 static uint16_t readReg(byte address) {
-    return readRegByte(address) + (readRegByte(address+1) << 8);
+  return readRegByte(address) + (readRegByte(address + 1) << 8);
 }
 
-
-static void writePhy (uint8_t address, uint16_t data) {
-    writeRegByte(MIREGADR, address);
-    writeReg(MIWR, data);
-    while (readRegByte(MISTAT) & MISTAT_BUSY)
-        ;
+static void writePhy(uint8_t address, uint16_t data) {
+  writeRegByte(MIREGADR, address);
+  writeReg(MIWR, data);
+  while (readRegByte(MISTAT) & MISTAT_BUSY)
+    ;
 }
 
-static uint16_t readPhyByte (uint8_t address) {
-    writeRegByte(MIREGADR, address);
-    writeRegByte(MICMD, MICMD_MIIRD);
-    while (readRegByte(MISTAT) & MISTAT_BUSY)
-        ;
-    writeRegByte(MICMD, 0x00);
-    return readRegByte(MIRD+1);
+static uint16_t readPhyByte(uint8_t address) {
+  writeRegByte(MIREGADR, address);
+  writeRegByte(MICMD, MICMD_MIIRD);
+  while (readRegByte(MISTAT) & MISTAT_BUSY)
+    ;
+  writeRegByte(MICMD, 0x00);
+  return readRegByte(MIRD + 1);
 }
-
-uint8_t getThing(unsigned char address) {
-	return readRegByte(address);
-}
-
-static void getMacAddr() {
-	uint8_t arr[6];
-	arr[0] = readReg(MAADR5);
-	arr[1] = readReg(MAADR4);
-	arr[2] = readReg(MAADR3);
-	arr[3] = readReg(MAADR2);
-	arr[4] = readReg(MAADR1);
-	arr[5] = readReg(MAADR0);
-
-	for(int i = 0; i < 6; i++)
-		printf("%x, ", arr[i]);
-}
-
-//static void doOtherThing() {
-//	uint8_t arr[2];
-//	arr[0] = readReg(EPKTCNT);
-//
-//	writeOp(ENC28J60_BIT_FIELD_SET, EPKTCNT, 0x05);
-//
-//	arr[1] = readReg(EPKTCNT);
-//	printf("doOtherThing out: ");
-//	for(int i = 0; i < 2; i++)
-//		printf("%x, ", arr[i]);
-//
-//}
 
 uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
                              uint8_t csPin) {
-
-
-//	uint8_t arr2[1];
-//	arr2[0] = readReg(0x0A);
-//	printf("ar: %x", arr2[0]);
-//	return 6;
-
   bufferSize = size;
-
   selectPin = csPin;
-
-  // if (bitRead(SPCR, SPE) == 0)
-  //   initSPI();
-
-  // pinMode(selectPin, OUTPUT);
-//  disableChip();
 
   writeOp(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);
   delay(2); // errata B7/2
@@ -479,25 +385,16 @@ uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
   writeReg(MAIPG, 0x0C12);
   writeRegByte(MABBIPG, 0x12);
   writeReg(MAMXFL, MAX_FRAMELEN);
-  printf("at 2nd: %x\n", macaddr[1]);
-
-	writeRegByte(MAADR5, macaddr[0]);
-	writeRegByte(MAADR4, macaddr[1]);
-	writeRegByte(MAADR3, macaddr[2]);
-	writeRegByte(MAADR2, macaddr[3]);
-	writeRegByte(MAADR1, macaddr[4]);
-	writeRegByte(MAADR0, macaddr[5]);
-
-	getMacAddr();
-
+  writeRegByte(MAADR5, macaddr[0]);
+  writeRegByte(MAADR4, macaddr[1]);
+  writeRegByte(MAADR3, macaddr[2]);
+  writeRegByte(MAADR2, macaddr[3]);
+  writeRegByte(MAADR1, macaddr[4]);
+  writeRegByte(MAADR0, macaddr[5]);
   writePhy(PHCON2, PHCON2_HDLDIS);
   SetBank(ECON1);
   writeOp(ENC28J60_BIT_FIELD_SET, EIE, EIE_INTIE | EIE_PKTIE);
   writeOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_RXEN);
-
-//  SetBank(ECON2);
-//  writeOp(ENC28J60_BIT_FIELD_SET, ECON2, 0x80);
-//  SetBank(ECON1);
 
   uint8_t rev = readRegByte(EREVID);
   // microchip forgot to step the number on the silicon when they
@@ -507,201 +404,196 @@ uint8_t ENC28J60::initialize(uint16_t size, const uint8_t *macaddr,
   if (rev > 5)
     ++rev;
 
-
-
   return rev;
 }
 
-bool ENC28J60::isLinkUp() {
-    return (readPhyByte(PHSTAT2) >> 2) & 1;
+bool ENC28J60::isLinkUp() { return (readPhyByte(PHSTAT2) >> 2) & 1; }
+
+static void readBuf(uint16_t len, byte *data) {
+  if (len != 0) {
+    uint8_t send_data[1], data2[len];
+    send_data[0] = ENC28J60_READ_BUF_MEM;
+    alt_avalon_spi_command(SPI_0_BASE, ETHERNET_CHIP_SLAVE,
+                           1,         //
+                           send_data, // write data
+                           len,       // Read 8 bytes
+                           data,      // read into SPDR
+                           0);        // no flags
+    data += len;
+  }
 }
 
+static void writeBuf(uint16_t len, const byte *data) {
+  if (len != 0) {
+    uint8_t send_data[len + 1];
+    send_data[0] = ENC28J60_WRITE_BUF_MEM;
+	memcpy(send_data + 1, data, len);
 
-static void readBuf(uint16_t len, byte* data) {
-    if (len != 0) {
-//    	alt_irq_context irqc = alt_irq_disable_all();
-//    	alt_irq_disable(1);
-    	uint8_t send_data[1], data2[len];
-    	send_data[0] = ENC28J60_READ_BUF_MEM;
-    	alt_avalon_spi_command( SPI_0_BASE,
-    							ETHERNET_CHIP_SLAVE,
-    							1, //
-								send_data, // write data
-    							len, // Read 8 bytes
-								data, // read into SPDR
-    							0); // no flags
-//    	alt_avalon_spi_command( SPI_0_BASE,
-//    							ETHERNET_CHIP_SLAVE,
-//    							1, //
-//								send_data, // write data
-//    							len, // Read 8 bytes
-//								data2, // read into SPDR
-//    							0); // no flags
-//    	if(len < 10) {
-//			for(int i = 0; i < len; i++)
-//				printf("%x/%x (%x), ", data[i], data2[i], i);
-//			printf("\n");
-//    	} else {
-//    		printf("packet of len %d\n", len);
-//    	}
-    	data += len;
-//    	alt_irq_enable_all(irqc);
-    }
-}
+    alt_avalon_spi_command(SPI_0_BASE, ETHERNET_CHIP_SLAVE,
+                           len + 1,   //
+                           send_data, // write data
+                           0,         // Read 8 bytes
+                           0,         // read into SPDR
+                           0);        // no flags
 
-// TODO
-static void writeBuf(uint16_t len, const byte* data) {
-    if (len != 0) {
-//    	uint8_t send_data[1];
-//    	send_data[0] = ENC28J60_WRITE_BUF_MEM;
-
-    	uint8_t send_data[len + 1];
-    	send_data[0] = ENC28J60_WRITE_BUF_MEM;
-    	for(int i = 0; i < len; i++)
-    		send_data[i+1] = data[i];
-//    	memcpy(send_data + 1, data, len);
-
-    	alt_avalon_spi_command( SPI_0_BASE,
-    							ETHERNET_CHIP_SLAVE,
-    							len + 1, //
-								send_data, // write data
-    							0, // Read 8 bytes
-    							0, // read into SPDR
-    							0); // no flags
-
-    	data += len;
-    }
+    data += len;
+  }
 }
 
 uint16_t ENC28J60::packetReceive() {
-    static uint16_t gNextPacketPtr = RXSTART_INIT;
-    static bool     unreleasedPacket = false;
-    uint16_t len = 0;
+  static uint16_t gNextPacketPtr = RXSTART_INIT;
+  static bool unreleasedPacket = false;
+  uint16_t len = 0;
 
-    if (unreleasedPacket) {
-        if (gNextPacketPtr == 0)
-            writeReg(ERXRDPT, RXSTOP_INIT);
-        else
-            writeReg(ERXRDPT, gNextPacketPtr - 1);
-        unreleasedPacket = false;
-    }
+  if (unreleasedPacket) {
+    if (gNextPacketPtr == 0)
+      writeReg(ERXRDPT, RXSTOP_INIT);
+    else
+      writeReg(ERXRDPT, gNextPacketPtr - 1);
+    unreleasedPacket = false;
+  }
 
-    uint8_t r = readRegByte(EPKTCNT);
-    if (r > 0) {
-//    	printf("readregbyte %d", r);
-        writeReg(ERDPT, gNextPacketPtr);
+  if (readRegByte(EPKTCNT) > 0) {
+    writeReg(ERDPT, gNextPacketPtr);
 
-        struct {
-            uint16_t nextPacket;
-            uint16_t byteCount;
-            uint16_t status;
-        } header;
+    struct {
+      uint16_t nextPacket;
+      uint16_t byteCount;
+      uint16_t status;
+    } header;
 
-        readBuf(sizeof header, (byte*) &header);
+    readBuf(sizeof header, (byte *)&header);
 
-        gNextPacketPtr  = header.nextPacket;
-        len = header.byteCount - 4; //remove the CRC count
-        if (len>bufferSize-1)
-            len=bufferSize-1;
-        if ((header.status & 0x80)==0)
-            len = 0;
-        else
-            readBuf(len, buffer);
-        buffer[len] = 0;
-        unreleasedPacket = true;
+    gNextPacketPtr = header.nextPacket;
+    len = header.byteCount - 4; // remove the CRC count
+    if (len > bufferSize - 1)
+      len = bufferSize - 1;
+    if ((header.status & 0x80) == 0)
+      len = 0;
+    else
+      readBuf(len, buffer);
+    buffer[len] = 0;
+    unreleasedPacket = true;
 
-        writeOp(ENC28J60_BIT_FIELD_SET, ECON2, ECON2_PKTDEC);
-
-//        printf("len = %d\n", len);
-    }
-    return len;
+    writeOp(ENC28J60_BIT_FIELD_SET, ECON2, ECON2_PKTDEC);
+  }
+  return len;
 }
-
 
 void ENC28J60::packetSend(uint16_t len) {
-    byte retry = 0;
+  byte retry = 0;
 
-    #if ETHERCARD_SEND_PIPELINING
-        goto resume_last_transmission;
-    #endif
-    while (1) {
-        // latest errata sheet: DS80349C
-        // always reset transmit logic (Errata Issue 12)
-        // the Microchip TCP/IP stack implementation used to first check
-        // whether TXERIF is set and only then reset the transmit logic
-        // but this has been changed in later versions; possibly they
-        // have a reason for this; they don't mention this in the errata
-        // sheet
-        writeOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRST);
-        writeOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_TXRST);
-        writeOp(ENC28J60_BIT_FIELD_CLR, EIR, EIR_TXERIF|EIR_TXIF);
+#if ETHERCARD_SEND_PIPELINING
+  goto resume_last_transmission;
+#endif
+  while (1) {
+    // latest errata sheet: DS80349C
+    // always reset transmit logic (Errata Issue 12)
+    // the Microchip TCP/IP stack implementation used to first check
+    // whether TXERIF is set and only then reset the transmit logic
+    // but this has been changed in later versions; possibly they
+    // have a reason for this; they don't mention this in the errata
+    // sheet
+    writeOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRST);
+    writeOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_TXRST);
+    writeOp(ENC28J60_BIT_FIELD_CLR, EIR, EIR_TXERIF | EIR_TXIF);
 
-        // prepare new transmission
-        if (retry == 0) {
-            writeReg(EWRPT, TXSTART_INIT);
-            writeReg(ETXND, TXSTART_INIT+len);
-            writeOp(ENC28J60_WRITE_BUF_MEM, 0, 0x00);
-            writeBuf(len, buffer);
-        }
-
-        // initiate transmission
-        writeOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRTS);
-        #if ETHERCARD_SEND_PIPELINING
-            if (retry == 0) return;
-        #endif
-
-    resume_last_transmission:
-
-        // wait until transmission has finished; referring to the data sheet and
-        // to the errata (Errata Issue 13; Example 1) you only need to wait until either
-        // TXIF or TXERIF gets set; however this leads to hangs; apparently Microchip
-        // realized this and in later implementations of their tcp/ip stack they introduced
-        // a counter to avoid hangs; of course they didn't update the errata sheet
-        uint16_t count = 0;
-        while ((readRegByte(EIR) & (EIR_TXIF | EIR_TXERIF)) == 0 && ++count < 1000U)
-            ;
-
-        if (!(readRegByte(EIR) & EIR_TXERIF) && count < 1000U) {
-            // no error; start new transmission
-            break;
-        }
-
-        // cancel previous transmission if stuck
-        writeOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_TXRTS);
-
-    #if ETHERCARD_RETRY_LATECOLLISIONS == 0
-        break;
-    #endif
-
-        // Check whether the chip thinks that a late collision occurred; the chip
-        // may be wrong (Errata Issue 13); therefore we retry. We could check
-        // LATECOL in the ESTAT register in order to find out whether the chip
-        // thinks a late collision occurred but (Errata Issue 15) tells us that
-        // this is not working. Therefore we check TSV
-        transmit_status_vector tsv;
-        uint16_t etxnd = readReg(ETXND);
-        writeReg(ERDPT, etxnd+1);
-        readBuf(sizeof(transmit_status_vector), (byte*) &tsv);
-        // LATECOL is bit number 29 in TSV (starting from 0)
-
-        if (!((readRegByte(EIR) & EIR_TXERIF) && (tsv.bytes[3] & 1<<5) /*tsv.transmitLateCollision*/) || retry > 16U) {
-            // there was some error but no LATECOL so we do not repeat
-            break;
-        }
-
-        retry++;
+    // prepare new transmission
+    if (retry == 0) {
+      writeReg(EWRPT, TXSTART_INIT);
+      writeReg(ETXND, TXSTART_INIT + len);
+      writeOp(ENC28J60_WRITE_BUF_MEM, 0, 0x00);
+      writeBuf(len, buffer);
     }
+
+    // initiate transmission
+    writeOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRTS);
+#if ETHERCARD_SEND_PIPELINING
+    if (retry == 0)
+      return;
+#endif
+
+  resume_last_transmission:
+
+    // wait until transmission has finished; referring to the data sheet and
+    // to the errata (Errata Issue 13; Example 1) you only need to wait until
+    // either TXIF or TXERIF gets set; however this leads to hangs; apparently
+    // Microchip realized this and in later implementations of their tcp/ip
+    // stack they introduced a counter to avoid hangs; of course they didn't
+    // update the errata sheet
+    uint16_t count = 0;
+    while ((readRegByte(EIR) & (EIR_TXIF | EIR_TXERIF)) == 0 && ++count < 1000U)
+      ;
+
+    if (!(readRegByte(EIR) & EIR_TXERIF) && count < 1000U) {
+      // no error; start new transmission
+      break;
+    }
+
+    // cancel previous transmission if stuck
+    writeOp(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_TXRTS);
+
+#if ETHERCARD_RETRY_LATECOLLISIONS == 0
+    break;
+#endif
+
+    // Check whether the chip thinks that a late collision occurred; the chip
+    // may be wrong (Errata Issue 13); therefore we retry. We could check
+    // LATECOL in the ESTAT register in order to find out whether the chip
+    // thinks a late collision occurred but (Errata Issue 15) tells us that
+    // this is not working. Therefore we check TSV
+    transmit_status_vector tsv;
+    uint16_t etxnd = readReg(ETXND);
+    writeReg(ERDPT, etxnd + 1);
+    readBuf(sizeof(transmit_status_vector), (byte *)&tsv);
+    // LATECOL is bit number 29 in TSV (starting from 0)
+
+    if (!((readRegByte(EIR) & EIR_TXERIF) &&
+          (tsv.bytes[3] & 1 << 5) /*tsv.transmitLateCollision*/) ||
+        retry > 16U) {
+      // there was some error but no LATECOL so we do not repeat
+      break;
+    }
+
+    retry++;
+  }
 }
 
-void ENC28J60::enableBroadcast (bool temporary) {
-    writeRegByte(ERXFCON, readRegByte(ERXFCON) | ERXFCON_BCEN);
-    if(!temporary)
-        broadcast_enabled = true;
+void ENC28J60::enableBroadcast(bool temporary) {
+  writeRegByte(ERXFCON, readRegByte(ERXFCON) | ERXFCON_BCEN);
+  if (!temporary)
+    broadcast_enabled = true;
 }
 
-void ENC28J60::disableBroadcast (bool temporary) {
-    if(!temporary)
-        broadcast_enabled = false;
-    if(!broadcast_enabled)
-        writeRegByte(ERXFCON, readRegByte(ERXFCON) & ~ERXFCON_BCEN);
+void ENC28J60::disableBroadcast(bool temporary) {
+  if (!temporary)
+    broadcast_enabled = false;
+  if (!broadcast_enabled)
+    writeRegByte(ERXFCON, readRegByte(ERXFCON) & ~ERXFCON_BCEN);
+}
+
+byte ENC28J60::peekin (byte page, byte off) {
+    byte result = 0;
+    uint16_t destPos = SCRATCH_START + (page << SCRATCH_PAGE_SHIFT) + off;
+    if (SCRATCH_START <= destPos && destPos < SCRATCH_LIMIT) {
+        writeReg(ERDPT, destPos);
+        readBuf(1, &result);
+    }
+    return result;
+}
+
+void ENC28J60::copyout (byte page, const byte* data) {
+    uint16_t destPos = SCRATCH_START + (page << SCRATCH_PAGE_SHIFT);
+    if (destPos < SCRATCH_START || destPos > SCRATCH_LIMIT - SCRATCH_PAGE_SIZE)
+        return;
+    writeReg(EWRPT, destPos);
+    writeBuf(SCRATCH_PAGE_SIZE, data);
+}
+
+void ENC28J60::copyin (byte page, byte* data) {
+    uint16_t destPos = SCRATCH_START + (page << SCRATCH_PAGE_SHIFT);
+    if (destPos < SCRATCH_START || destPos > SCRATCH_LIMIT - SCRATCH_PAGE_SIZE)
+        return;
+    writeReg(ERDPT, destPos);
+    readBuf(SCRATCH_PAGE_SIZE, data);
 }

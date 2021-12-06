@@ -30,8 +30,8 @@
 //INPUT_CLOCK: 50000000
 //ISMASTER: 1
 //DATABITS: 8
-//TARGETCLOCK: 1000000
-//NUMSLAVES: 1
+//TARGETCLOCK: 2000000
+//NUMSLAVES: 2
 //CPOL: 0
 //CPHA: 0
 //LSBFIRST: 0
@@ -63,7 +63,7 @@ module nios_soc_spi_0 (
 
   output           MOSI;
   output           SCLK;
-  output           SS_n;
+  output  [  1: 0] SS_n;
   output  [ 15: 0] data_to_cpu;
   output           dataavailable;
   output           endofpacket;
@@ -88,7 +88,7 @@ reg              RRDY;
 wire             SCLK;
 reg              SCLK_reg;
 reg              SSO_reg;
-wire             SS_n;
+wire    [  1: 0] SS_n;
 wire             TMT;
 reg              TOE;
 wire             TRDY;
@@ -115,7 +115,7 @@ wire             p1_data_rd_strobe;
 wire    [ 15: 0] p1_data_to_cpu;
 wire             p1_data_wr_strobe;
 wire             p1_rd_strobe;
-wire    [  4: 0] p1_slowcount;
+wire    [  3: 0] p1_slowcount;
 wire             p1_wr_strobe;
 reg              rd_strobe;
 wire             readyfordata;
@@ -123,7 +123,7 @@ reg     [  7: 0] rx_holding_reg;
 reg     [  7: 0] shift_reg;
 wire             slaveselect_wr_strobe;
 wire             slowclock;
-reg     [  4: 0] slowcount;
+reg     [  3: 0] slowcount;
 wire    [ 10: 0] spi_control;
 reg     [ 15: 0] spi_slave_select_holding_reg;
 reg     [ 15: 0] spi_slave_select_reg;
@@ -255,11 +255,11 @@ wire             write_tx_holding;
     end
 
 
-  // slowclock is active once every 25 system clock pulses.
-  assign slowclock = slowcount == 5'h18;
+  // slowclock is active once every 13 system clock pulses.
+  assign slowclock = slowcount == 4'hC;
 
-  assign p1_slowcount = ({5 {(transmitting && !slowclock)}} & (slowcount + 1)) |
-    ({5 {(~((transmitting && !slowclock)))}} & 0);
+  assign p1_slowcount = ({4 {(transmitting && !slowclock)}} & (slowcount + 1)) |
+    ({4 {(~((transmitting && !slowclock)))}} & 0);
 
   // Divide counter for SPI clock.
   always @(posedge clk or negedge reset_n)
@@ -319,7 +319,7 @@ wire             write_tx_holding;
 
   assign enableSS = transmitting & ~stateZero;
   assign MOSI = shift_reg[7];
-  assign SS_n = (enableSS | SSO_reg) ? ~spi_slave_select_reg : {1 {1'b1} };
+  assign SS_n = (enableSS | SSO_reg) ? ~spi_slave_select_reg : {2 {1'b1} };
   assign SCLK = SCLK_reg;
   // As long as there's an empty spot somewhere,
   //it's safe to write data.

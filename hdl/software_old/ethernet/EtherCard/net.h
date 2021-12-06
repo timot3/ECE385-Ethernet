@@ -16,17 +16,17 @@
 // ******* SERVICE PORTS *******
 #define HTTP_PORT 80
 //#define HTTP_PORT 3080
-#define DNS_PORT  53
-#define NTP_PORT  123
+#define DNS_PORT 53
+#define NTP_PORT 123
 
 // ******* ETH *******
-#define ETH_HEADER_LEN    14
+#define ETH_HEADER_LEN 14
 #define ETH_LEN 6
 // values of certain bytes:
 #define ETHTYPE_ARP_H_V 0x08
 #define ETHTYPE_ARP_L_V 0x06
-#define ETHTYPE_IP_H_V  0x08
-#define ETHTYPE_IP_L_V  0x00
+#define ETHTYPE_IP_H_V 0x08
+#define ETHTYPE_IP_L_V 0x00
 // byte positions in the ethernet frame:
 //
 // Ethernet type field (2bytes):
@@ -35,7 +35,6 @@
 //
 #define ETH_DST_MAC 0
 #define ETH_SRC_MAC 6
-
 
 // ******* ARP *******
 #define ETH_ARP_OPCODE_REPLY_H_V 0x0
@@ -58,7 +57,7 @@
 #define ETH_ARP_DST_IP_P 0x26
 
 // ******* IP *******
-#define IP_HEADER_LEN    20
+#define IP_HEADER_LEN 20
 #define IP_LEN 4
 // ip.src
 #define IP_SRC_P 0x1a
@@ -90,7 +89,7 @@
 #define ICMP_DATA_P 0x2a
 
 // ******* UDP *******
-#define UDP_HEADER_LEN    8
+#define UDP_HEADER_LEN 8
 //
 #define UDP_SRC_PORT_H_P 0x22
 #define UDP_SRC_PORT_L_P 0x23

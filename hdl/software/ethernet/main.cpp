@@ -316,7 +316,7 @@ int main() {
       timer = clock() + 5000;
       printf("\n");
       printf("<<< REQ ");
-      ether.browseUrl("/foo/", "bar", website, my_callback);
+      ether.browseUrl("/", "", website, my_callback);
     }
   }
 

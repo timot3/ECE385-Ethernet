@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "bufferfiller.h"
+#include "stash.h"
 
 #undef word // arduino nonsense
 
@@ -545,10 +546,10 @@ static uint8_t client_store_mac(uint8_t *source_ip, uint8_t *mac) {
   return 1;
 }
 
-// static void client_gw_arp_refresh() {
-//   if (waitgwmac & WGW_HAVE_GW_MAC)
-//     waitgwmac |= WGW_REFRESHING;
-// }
+ static void client_gw_arp_refresh() {
+   if (waitgwmac & WGW_HAVE_GW_MAC)
+     waitgwmac |= WGW_REFRESHING;
+ }
 
 void EtherCard::setGwIp(const uint8_t *gwipaddr) {
   delaycnt = 0;                // request gateway ARP lookup
@@ -691,19 +692,19 @@ void EtherCard::httpPost(const char *urlbuf, const char *hoststr,
 }
 
 static uint16_t tcp_datafill_cb(uint8_t fd) {
-  //     uint16_t len = Stash::length();
-  //     Stash::extract(0, len, EtherCard::tcpOffset());
-  //     Stash::cleanup();
-  //     EtherCard::tcpOffset()[len] = 0;
-  // #if SERIAL_PRINT
-  //     Serial.print("REQUEST: ");
-  //     Serial.println(len);
-  //     Serial.println((char*) EtherCard::tcpOffset());
-  // #endif
-  //     result_fd = 123; // bogus value
-  //     return len;
+       uint16_t len = Stash::length();
+       Stash::extract(0, len, EtherCard::tcpOffset());
+       Stash::cleanup();
+       EtherCard::tcpOffset()[len] = 0;
+   #if SERIAL_PRINT
+       Serial.print("REQUEST: ");
+       Serial.println(len);
+       Serial.println((char*) EtherCard::tcpOffset());
+   #endif
+       result_fd = 123; // bogus value
+       return len;
 
-  return 0;
+//  return 0;
 }
 
 static uint8_t tcp_result_cb(uint8_t fd, uint8_t status, uint16_t datapos,

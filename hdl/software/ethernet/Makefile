@@ -151,6 +151,7 @@ CXX_SRCS += EtherCard/bufferfiller.cpp
 CXX_SRCS += EtherCard/dhcp.cpp
 CXX_SRCS += EtherCard/dns.cpp
 CXX_SRCS += EtherCard/enc28j60.cpp
+CXX_SRCS += EtherCard/stash.cpp
 CXX_SRCS += EtherCard/tcpip.cpp
 CXX_SRCS += EtherCard/udpserver.cpp
 CXX_SRCS += EtherCard/webutil.cpp

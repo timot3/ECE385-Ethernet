@@ -691,3 +691,29 @@ void ENC28J60::disableBroadcast(bool temporary) {
   if (!broadcast_enabled)
     writeRegByte(ERXFCON, readRegByte(ERXFCON) & ~ERXFCON_BCEN);
 }
+
+byte ENC28J60::peekin (byte page, byte off) {
+    byte result = 0;
+    uint16_t destPos = SCRATCH_START + (page << SCRATCH_PAGE_SHIFT) + off;
+    if (SCRATCH_START <= destPos && destPos < SCRATCH_LIMIT) {
+        writeReg(ERDPT, destPos);
+        readBuf(1, &result);
+    }
+    return result;
+}
+
+void ENC28J60::copyout (byte page, const byte* data) {
+    uint16_t destPos = SCRATCH_START + (page << SCRATCH_PAGE_SHIFT);
+    if (destPos < SCRATCH_START || destPos > SCRATCH_LIMIT - SCRATCH_PAGE_SIZE)
+        return;
+    writeReg(EWRPT, destPos);
+    writeBuf(SCRATCH_PAGE_SIZE, data);
+}
+
+void ENC28J60::copyin (byte page, byte* data) {
+    uint16_t destPos = SCRATCH_START + (page << SCRATCH_PAGE_SHIFT);
+    if (destPos < SCRATCH_START || destPos > SCRATCH_LIMIT - SCRATCH_PAGE_SIZE)
+        return;
+    writeReg(ERDPT, destPos);
+    readBuf(SCRATCH_PAGE_SIZE, data);
+}

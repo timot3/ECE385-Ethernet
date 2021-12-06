@@ -2,11 +2,11 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Dec 2, 2021 7:58:37 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1638496717511</BspGeneratedUnixTimeStamp>
-        <BspGeneratedLocation>C:\Users\timot\Desktop\classes\ECE385-Ethernet\hdl\software\ethernet_bsp</BspGeneratedLocation>
+        <BspGeneratedTimeStamp>Dec 5, 2021 6:32:57 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1638750777408</BspGeneratedUnixTimeStamp>
+        <BspGeneratedLocation>/media/sf_vm_shared/ECE385-Ethernet/hdl/software/ethernet_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
-        <SopcDesignFile>..\..\nios_soc.sopcinfo</SopcDesignFile>
+        <SopcDesignFile>../../nios_soc.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
         <Cpu>nios2_gen2_0</Cpu>
         <SchemaVersion>1.9</SchemaVersion>
@@ -917,32 +917,62 @@
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
+                <slaveDescriptor>keycode</slaveDescriptor>
+                <addressRange>0x00011140 - 0x0001114F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>usb_rst</slaveDescriptor>
+                <addressRange>0x00011150 - 0x0001115F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>usb_gpx</slaveDescriptor>
+                <addressRange>0x00011160 - 0x0001116F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>usb_irq</slaveDescriptor>
+                <addressRange>0x00011170 - 0x0001117F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>hex_digits_pio</slaveDescriptor>
+                <addressRange>0x00011180 - 0x0001118F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
                 <slaveDescriptor>gpio</slaveDescriptor>
-                <addressRange>0x000110F0 - 0x000110FF</addressRange>
+                <addressRange>0x00011190 - 0x0001119F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>led</slaveDescriptor>
-                <addressRange>0x00011100 - 0x0001110F</addressRange>
+                <addressRange>0x000111A0 - 0x000111AF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>sdram_pll</slaveDescriptor>
-                <addressRange>0x00011110 - 0x0001111F</addressRange>
+                <addressRange>0x000111B0 - 0x000111BF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>sysid_qsys_0</slaveDescriptor>
-                <addressRange>0x00011130 - 0x00011137</addressRange>
+                <addressRange>0x000111D0 - 0x000111D7</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>jtag_uart_0</slaveDescriptor>
-                <addressRange>0x00011138 - 0x0001113F</addressRange>
+                <addressRange>0x000111D8 - 0x000111DF</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>

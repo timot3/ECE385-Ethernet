@@ -2,10 +2,10 @@
 #include <system.h>
 
 // Set to 0 to disable keyboard code
-#define USING_KEYBOARD 1
+#define USING_KEYBOARD 0
 
 // 0x00 = pinging, 0x01 = fetch data from website, 0x02 = host website, 0x03 = post request
-#define PROG_NUM 0x03
+#define PROG_NUM 0x02
 
 #include "EtherCard/EtherCard.h"
 #include "altera_avalon_pio_regs.h"

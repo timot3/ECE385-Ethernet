@@ -68,20 +68,6 @@ public:
    */
   void emit_p(const char *fmt, ...);
 
-  /** @brief  Add data to buffer from main memory
-   *   @param  s Pointer to data
-   *   @param  n Number of characters to copy
-   */
-  //    void emit_raw (const char* s, uint16_t n) { memcpy(ptr, s, n); ptr += n;
-  //    }
-
-  /** @brief  Add data to buffer from program space string
-   *   @param  p Program space string pointer
-   *   @param  n Number of characters to copy
-   */
-  //    void emit_raw_p (const char* p, uint16_t n) { memcpy_P(ptr, p, n); ptr
-  //    += n; }
-
   /** @brief  Get pointer to start of buffer
    *   @return <i>uint8_t*</i> Pointer to start of buffer
    */
@@ -91,11 +77,6 @@ public:
    *   @return <i>uint16_t</i> Cursor position
    */
   uint16_t position() const { return ptr - start; }
-
-  /** @brief  Write one byte to buffer
-   *   @param  v Byte to add to buffer
-   */
-  //    virtual size_t write (uint8_t v) { *ptr++ = v; return 1; }
 };
 
 #endif

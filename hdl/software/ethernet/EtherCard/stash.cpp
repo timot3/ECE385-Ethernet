@@ -146,12 +146,8 @@ void Stash::prepare (const char* fmt, ...) {
     Stash::load(WRITEBUF, 0);
     uint16_t* segs = Stash::bufs[WRITEBUF].words;
     *segs++ = strlen(fmt);
-#ifdef __AVR__
-    *segs++ = (uint16_t) fmt;
-#else
     *segs++ = (uint32_t) fmt;
     *segs++ = (uint32_t) fmt >> 16;
-#endif
     va_list ap;
     va_start(ap, fmt);
     for (;;) {
@@ -159,11 +155,7 @@ void Stash::prepare (const char* fmt, ...) {
         if (c == 0)
             break;
         if (c == '$') {
-#ifdef __AVR__
-            uint16_t argval = va_arg(ap, uint16_t), arglen = 0;
-#else
             uint32_t argval = va_arg(ap, int), arglen = 0;
-#endif
             switch (*fmt++) {
             case 'D': {
                 char buf[7];
@@ -190,12 +182,8 @@ void Stash::prepare (const char* fmt, ...) {
                 break;
             }
             }
-#ifdef __AVR__
-            *segs++ = argval;
-#else
             *segs++ = argval;
             *segs++ = argval >> 16;
-#endif
             Stash::bufs[WRITEBUF].words[0] += arglen - 2;
         }
     }
@@ -210,12 +198,8 @@ uint16_t Stash::length () {
 void Stash::extract (uint16_t offset, uint16_t count, void* buf) {
     Stash::load(WRITEBUF, 0);
     uint16_t* segs = Stash::bufs[WRITEBUF].words;
-#ifdef __AVR__
-    const char* fmt = (const char*) *++segs;
-#else
     const char* fmt = (const char*)((segs[2] << 16) | segs[1]);
     segs += 2;
-#endif
     Stash stash;
     char mode = '@', tmp[7], *ptr = NULL, *out = (char*) buf;
     for (uint16_t i = 0; i < offset + count; ) {
@@ -227,12 +211,8 @@ void Stash::extract (uint16_t offset, uint16_t count, void* buf) {
                 return;
             if (c != '$')
                 break;
-#ifdef __AVR__
-            uint16_t arg = *++segs;
-#else
             uint32_t arg = *++segs;
             arg |= *++segs << 16;
-#endif
             mode = *fmt++;
             switch (mode) {
             case 'D':
@@ -278,23 +258,15 @@ void Stash::extract (uint16_t offset, uint16_t count, void* buf) {
 void Stash::cleanup () {
     Stash::load(WRITEBUF, 0);
     uint16_t* segs = Stash::bufs[WRITEBUF].words;
-#ifdef __AVR__
-    const char* fmt = (const char*) *++segs;
-#else
     const char* fmt = (const char*)((segs[2] << 16) | segs[1]);
     segs += 2;
-#endif
     for (;;) {
         char c = *fmt++;
         if (c == 0)
             break;
         if (c == '$') {
-#ifdef __AVR__
-            uint16_t arg = *++segs;
-#else
             uint32_t arg = *++segs;
             arg |= *++segs << 16;
-#endif
             if (*fmt++ == 'H') {
                 Stash stash (arg);
                 stash.release();
@@ -302,4 +274,3 @@ void Stash::cleanup () {
         }
     }
 }
-

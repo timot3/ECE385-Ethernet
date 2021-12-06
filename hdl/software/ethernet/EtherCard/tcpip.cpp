@@ -641,8 +641,6 @@ static uint16_t www_client_internal_datafill_cb(uint8_t fd) {
            }
        }
        return bfill.position();
-
-//       return 0;
 }
 
 static uint8_t www_client_internal_result_cb(uint8_t fd, uint8_t statuscode,
@@ -703,8 +701,6 @@ static uint16_t tcp_datafill_cb(uint8_t fd) {
    #endif
        result_fd = 123; // bogus value
        return len;
-
-//  return 0;
 }
 
 static uint8_t tcp_result_cb(uint8_t fd, uint8_t status, uint16_t datapos,

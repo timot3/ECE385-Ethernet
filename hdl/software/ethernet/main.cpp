@@ -2,10 +2,10 @@
 #include <system.h>
 
 // Set to 0 to disable keyboard code
-#define USING_KEYBOARD 0
+#define USING_KEYBOARD 1
 
 // 0x00 = pinging, 0x01 = fetch data from website, 0x02 = host website
-#define PROG_NUM 0x00
+#define PROG_NUM 0x02
 
 #include "EtherCard/EtherCard.h"
 #include "altera_avalon_pio_regs.h"
@@ -128,8 +128,8 @@ int main() {
     printf("Failed to access Ethernet controller");
 
   ////  return 0;
-  //     if (!ether.dhcpSetup())
-  //       printf("DHCP failed");
+  //       if (!ether.dhcpSetup())
+  //         printf("DHCP failed");
 
   const static uint8_t ip[] = {192, 168, 0, 220};
   const static uint8_t gw[] = {192, 168, 0, 1};
@@ -328,6 +328,55 @@ static byte myip[] = {192, 168, 0, 220};
 
 byte Ethernet::buffer[500];
 BufferFiller bfill;
+uint8_t lastKeyPressed = 0x00;
+
+#if USING_KEYBOARD
+extern HID_DEVICE hid_device;
+
+static BYTE addr = 1; // hard-wired USB address
+const char *const devclasses[] = {" Uninitialized", " HID Keyboard",
+                                  " HID Mouse", " Mass storage"};
+
+BYTE GetDriverandReport() {
+  BYTE i;
+  BYTE rcode;
+  BYTE device = 0xFF;
+  BYTE tmpbyte;
+
+  DEV_RECORD *tpl_ptr;
+  printf("Reached USB_STATE_RUNNING (0x40)\n");
+  for (i = 1; i < USB_NUMDEVICES; i++) {
+    tpl_ptr = GetDevtable(i);
+    if (tpl_ptr->epinfo != NULL) {
+      printf("Device: %d", i);
+      printf("%s \n", devclasses[tpl_ptr->devclass]);
+      device = tpl_ptr->devclass;
+    }
+  }
+  // Query rate and protocol
+  rcode = XferGetIdle(addr, 0, hid_device.interface, 0, &tmpbyte);
+  if (rcode) { // error handling
+    printf("GetIdle Error. Error code: ");
+    printf("%x \n", rcode);
+  } else {
+    printf("Update rate: ");
+    printf("%x \n", tmpbyte);
+  }
+  printf("Protocol: ");
+  rcode = XferGetProto(addr, 0, hid_device.interface, &tmpbyte);
+  if (rcode) { // error handling
+    printf("GetProto Error. Error code ");
+    printf("%x \n", rcode);
+  } else {
+    printf("%d \n", tmpbyte);
+  }
+  return device;
+}
+
+void setKeycode(WORD keycode) {
+  IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_BASE, keycode);
+}
+#endif
 
 static uint16_t homePage() {
   long t = clock() / 1000;
@@ -341,13 +390,32 @@ static uint16_t homePage() {
                "\r\n"
                "<meta http-equiv='refresh' content='1'/>"
                "<title>RBBB server</title>"
-               "<h1>$D$D:$D$D:$D$D</h1>",
-               h / 10, h % 10, m / 10, m % 10, s / 10, s % 10);
+               "<h1>$D$D:$D$D:$D$D</h1>"
+               "<h3>last key pressed: $D$</h3>",
+               h / 10, h % 10, m / 10, m % 10, s / 10, s % 10, lastKeyPressed);
   return bfill.position();
 }
 
 int main() {
   printf("\n[RBBB Server]\n");
+
+#if USING_KEYBOARD
+  BYTE rcode;
+  BOOT_KBD_REPORT kbdbuf;
+
+  BYTE runningdebugflag = 0; // flag to dump out a bunch of information when we
+                             // first get to USB_STATE_RUNNING
+  BYTE errorflag = 0; // flag once we get an error device so we don't keep
+                      // dumping out state info
+  BYTE device;
+  WORD keycode;
+
+  printf("initializing MAX3421E...\n");
+  MAX3421E_init();
+  printf("initializing USB...\n");
+  USB_init();
+#endif
+
   // Change 'SS' to your Slave Select pin, if you arn't using the default pin
   if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
     printf("Failed to access Ethernet controller\n");
@@ -358,6 +426,47 @@ int main() {
 
     if (pos)                             // check if valid tcp data is received
       ether.httpServerReply(homePage()); // send web page data
+
+#if USING_KEYBOARD
+    MAX3421E_Task();
+    USB_Task();
+    if (GetUsbTaskState() == USB_STATE_RUNNING) {
+      if (!runningdebugflag) {
+        runningdebugflag = 1;
+        device = GetDriverandReport();
+      } else if (device == 1) {
+        // run keyboard debug polling
+        rcode = kbdPoll(&kbdbuf);
+        if (rcode == hrNAK) {
+          continue; // NAK means no new data
+        } else if (rcode) {
+          continue;
+        }
+
+        if (kbdbuf.keycode[0] != 0)
+          lastKeyPressed = kbdbuf.keycode[0];
+
+        setKeycode(kbdbuf.keycode[0]);
+      }
+    } else if (GetUsbTaskState() == USB_STATE_ERROR) {
+      if (!errorflag) {
+        errorflag = 1;
+        printf("USB Error State\n");
+        // print out string descriptor here
+      }
+    } else { // not in USB running state
+
+      printf("USB task state: ");
+      printf("%x\n", GetUsbTaskState());
+      if (runningdebugflag) { // previously running, reset USB hardware just to
+                              // clear out any funky state, HS/FS etc
+        runningdebugflag = 0;
+        MAX3421E_init();
+        USB_init();
+      }
+      errorflag = 0;
+    }
+#endif
   }
 
   return 0;

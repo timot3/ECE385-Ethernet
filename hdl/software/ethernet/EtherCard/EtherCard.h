@@ -26,22 +26,9 @@
 #define __PROG_TYPES_COMPAT__
 #endif
 
-// #if ARDUINO >= 100
-// #include <Arduino.h> // Arduino 1.0
-// #define WRITE_RESULT size_t
-// #define WRITE_RETURN return 1;
-// #else
-// #include <WProgram.h> // Arduino 0022
-// #define WRITE_RESULT void
-// #define WRITE_RETURN
-// #endif
-
-// #include <avr/pgmspace.h>
-//#include "bufferfiller.h"
 #include "enc28j60.h"
 #include "net.h"
 #include <cstddef>
-//#include "stash.h"
 
 typedef uint8_t byte;
 
@@ -111,8 +98,6 @@ typedef void (*DhcpOptionCallback)(
  *   @note   All TCP/IP client (outgoing) connections are made from source port
  * in range 2816-3071. Do not use these source ports for other purposes.
  */
-
-uint8_t getThing(unsigned char address);
 
 class EtherCard : public Ethernet {
 public:

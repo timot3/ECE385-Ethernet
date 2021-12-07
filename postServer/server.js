@@ -11,6 +11,7 @@ app.use(bodyParser.json());
 
 app.post('/sendCommand', (req, res) => {
   console.log("COMMAND: " + req.body.test);
+  res.json({connection: "Received command"});
 });
 
 app.listen(port, () => {

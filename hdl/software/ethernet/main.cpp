@@ -5,7 +5,7 @@
 #define USING_KEYBOARD 0
 
 // 0x00 = pinging, 0x01 = fetch data from website, 0x02 = host uptime website, 0x03 = post request
-// 0x04 = get user input from site, 0x05 = set alma lights from site (not working)
+// 0x04 = get user input from site, 0x05 = set alma lights from site
 #define PROG_NUM 0x05
 
 #include "EtherCard/EtherCard.h"
@@ -640,9 +640,6 @@ int main() {
 }
 
 #elif PROG_NUM == 0x05
-
-// doesn't work properly
-
 #include "EtherCard/bufferfiller.h"
 
 // ethernet interface mac address, must be unique on the LAN
@@ -654,7 +651,6 @@ BufferFiller bfill;
 char keyPressedArr[50];
 int locInArr = 0;
 
-
 static uint16_t homePage() {
   bfill = ether.tcpOffset();
   bfill.emit_p("HTTP/1.0 200 OK\r\n"
@@ -662,7 +658,8 @@ static uint16_t homePage() {
                 "Pragma: no-cache\r\n"
                 "\r\n"
                 "<title>ECE 385 FPGA Server</title>"
-                "<input id=n1 type=number value=255> <input id=n2 type=number value=255> <input id=n3 type=number value=255>"
+                "<label for=n1>Red: </label><input id=n1 type=number value=255><br><label for=n2>Green: </label><input id=n2 type=number value=255>"
+                "<br><label for=n3>Blue: </label><input id=n3 type=number value=255><br>"
                 "<button onclick=mF()>Send Color</button><script>function mF() {fetch('http://www.alma.lol/sendCommand', {method: 'POST',body:"
                 " \"{\\\"color\\\": \\\"{\\\\\\\"senderUID\\\\\\\":\\\\\\\"10000000\\\\\\\",\\\\\\\"receiverUID\\\\\\\":\\\\\\\"10203FFF\\\\\\\""
                 ",\\\\\\\"functionID\\\\\\\":\\\\\\\"0\\\\\\\",\\\\\\\"data\\\\\\\":[\"+parseInt(document.getElementById(\"n1\").value)+\",\"+"
@@ -673,8 +670,7 @@ static uint16_t homePage() {
 }
 
 int main() {
-  printf("\n[RBBB Server]\n");
-
+  printf("\n[Set Lights Server]\n");
 
   // Change 'SS' to your Slave Select pin, if you arn't using the default pin
   if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
@@ -690,14 +686,5 @@ int main() {
 
   return 0;
 }
-
-
-
-
-
-
-
-
-
 
 #endif

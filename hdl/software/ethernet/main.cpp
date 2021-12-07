@@ -5,7 +5,8 @@
 #define USING_KEYBOARD 0
 
 // 0x00 = pinging, 0x01 = fetch data from website, 0x02 = host website, 0x03 = post request
-#define PROG_NUM 0x02
+// 0x04 = get user input from site, 0x05 = set alma lights from site (not working)
+#define PROG_NUM 0x04
 
 #include "EtherCard/EtherCard.h"
 #include "altera_avalon_pio_regs.h"
@@ -487,10 +488,13 @@ int main() {
 // Using
 // https://stackoverflow.com/questions/49244535/arduino-uno-post-data-using-enc28j60
 // as reference
-#define REQUEST_RATE 5000 // milliseconds
-#define API_PORT 3080
+#define REQUEST_RATE 2500 // milliseconds
+#define API_PORT 80
 
-const char website[] = "192.168.0.124";
+#include <stdlib.h>
+
+const char website[] = "www.alma.lol";
+//const char website[] = "192.168.0.124";
 static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
 
 byte Ethernet::buffer[500];
@@ -521,10 +525,13 @@ int main() {
     printf("pain and suffering");
   }
 
-  ether.hisip[0] = 192;
-  ether.hisip[1] = 168;
-  ether.hisip[2] = 0;
-  ether.hisip[3] = 124;
+//   ether.hisip[0] = 192;
+//   ether.hisip[1] = 168;
+//   ether.hisip[2] = 0;
+//   ether.hisip[3] = 124;
+
+  if (!ether.dnsLookup(website))
+    printf("DNS failed");
 
   ether.printIp("My IP: ", ether.myip);
   ether.printIp("Netmask: ", ether.netmask);
@@ -542,14 +549,226 @@ int main() {
     if (clock() > timer + REQUEST_RATE) {
       timer = clock();
       printf("\n>>> REQ SENDING \n");
-
+      int r = rand() % 256, g = rand() % 256, b = rand() % 256;
+      char sendStr[146];
+      sprintf(sendStr, "{\"color\": \"{\\\"senderUID\\\":\\\"10000000\\\",\\\"receiverUID\\\":\\\"10203FFF\\\",\\\"functionID\\\":\\\"0\\\",\\\"data\\\":[%d,%d,%d]}\"}", r, g, b);
+      printf("r:%d, g:%d, b:%d\n", r, g, b);
       ether.httpPost("/sendCommand", website, "Content-Type: application/json",
-                     "{\"test\": \"from FPGA\"}", my_result_cb);
+                     sendStr, my_result_cb);
       printf("done\n");
     }
   }
 
   return 0;
 }
+
+#elif PROG_NUM == 0x04
+
+#include "EtherCard/bufferfiller.h"
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+
+static byte mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
+
+byte Ethernet::buffer[2000];
+BufferFiller bfill;
+char keyPressedArr[50];
+int locInArr = 0;
+
+static uint16_t homePage() {
+  long t = clock() / 1000;
+  uint16_t h = t / 3600;
+  byte m = (t / 60) % 60;
+  byte s = t % 60;
+  bfill = ether.tcpOffset();
+  bfill.emit_p("HTTP/1.0 200 OK\r\n"
+               "Content-Type: text/html\r\n"
+               "Pragma: no-cache\r\n"
+               "\r\n"
+               "<title>ECE 385 FPGA Server</title>"
+               "<center><form>"
+               "<label for=\"query\"></label>"
+               "<input type=\"text\" id=\"DATA\" name=\"DATA\" "
+               "placeholder=\"Enter some text here...\"><br><br>"
+               "<input type=\"submit\" value=\"Send data\">"
+               "</form>"
+               "</center>",
+               h / 10, h % 10, m / 10, m % 10, s / 10, s % 10, keyPressedArr);
+
+  return bfill.position();
+}
+
+int main() {
+  printf("\n[User Data Server]\n");
+
+  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
+  if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
+    printf("Failed to access Ethernet controller\n");
+
+  const static uint8_t ip[] = {192, 168, 0, 220};
+  const static uint8_t gw[] = {192, 168, 0, 1};
+  const static uint8_t dns[] = {192, 168, 0, 1};
+  const static uint8_t mask[] = {255, 255, 255, 0};
+
+  if (!ether.staticSetup(ip, gw, dns, mask)) {
+    // handle failure to configure static IP address (current implementation
+    // always returns true!)
+    printf("pain and suffering");
+  }
+
+  printf("starting while loop\n");
+  while (1) {
+    uint16_t len = ether.packetReceive();
+    uint16_t pos = ether.packetLoop(len);
+
+    if (pos) { // check if valid tcp data is received
+      if (strstr((char *)Ethernet::buffer + pos, "GET /?DATA=")) {
+        std::string input((const char *)(Ethernet::buffer + pos + 11));
+        std::string endStr = " HTTP/1.1";
+        unsigned last = input.find(endStr);
+        input = input.substr(0, last);
+
+        printf("User input: %s\n", input.c_str());
+      }
+      ether.httpServerReply(homePage()); // send web page data
+    }
+  }
+
+  return 0;
+}
+
+#elif PROG_NUM == 0x05
+
+// doesn't work properly
+
+#include "EtherCard/bufferfiller.h"
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+
+// ethernet interface mac address, must be unique on the LAN
+static byte mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
+static byte myip[] = {192, 168, 0, 220};
+
+byte Ethernet::buffer[2000];
+BufferFiller bfill;
+char keyPressedArr[50];
+int locInArr = 0;
+
+const char website[] = "192.168.0.124";
+
+// called when the client request is complete
+static void my_result_cb(byte status, uint16_t off, uint16_t len) {
+  printf("%s\n", (const char *)Ethernet::buffer + off);
+}
+
+void sendPostCmd() {
+
+  char sendStr[146];
+  int r = 255;
+  int g = 100;
+  int b = 100;
+  sprintf(sendStr,
+          "{\"color\": "
+          "\"{\\\"senderUID\\\":\\\"10000000\\\",\\\"receiverUID\\\":"
+          "\\\"10203FFF\\\",\\\"functionID\\\":\\\"0\\\",\\\"data\\\":[%d,%d,%"
+          "d]}\"}",
+          r, g, b);
+  printf("r:%d, g:%d, b:%d\n", r, g, b);
+  ether.httpPost("/sendCommand", website, "Content-Type: application/json",
+                 sendStr, my_result_cb);
+}
+
+static uint16_t homePage() {
+  long t = clock() / 1000;
+  uint16_t h = t / 3600;
+  byte m = (t / 60) % 60;
+  byte s = t % 60;
+  bfill = ether.tcpOffset();
+  bfill.emit_p("HTTP/1.0 200 OK\r\n"
+               "Content-Type: text/html\r\n"
+               "Pragma: no-cache\r\n"
+               "\r\n"
+               "<title>ECE 385 FPGA Server</title>"
+               "<center><form>"
+               "<label for=\"query\"></label>"
+               "<input type=\"text\" id=\"DATA\" name=\"DATA\" "
+               "placeholder=\"Enter some text here...\"><br><br>"
+               "<input type=\"submit\" value=\"Send data\">"
+               "</form>"
+               "</center>",
+               h / 10, h % 10, m / 10, m % 10, s / 10, s % 10, keyPressedArr);
+
+  return bfill.position();
+}
+
+int main() {
+  printf("\n[RBBB Server]\n");
+
+  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
+  if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
+    printf("Failed to access Ethernet controller\n");
+  //  ether.staticSetup(myip);
+  const static uint8_t ip[] = {192, 168, 0, 220};
+  const static uint8_t gw[] = {192, 168, 0, 1};
+  const static uint8_t dns[] = {192, 168, 0, 1};
+  const static uint8_t mask[] = {255, 255, 255, 0};
+
+  if (!ether.staticSetup(ip, gw, dns, mask)) {
+    // handle failure to configure static IP address (current implementation
+    // always returns true!)
+    printf("pain and suffering");
+  }
+
+  //	if (!ether.dnsLookup(website))
+  //		printf("DNS failed");
+
+  //      ether.hisip[0] = 192;
+  //      ether.hisip[1] = 168;
+  //      ether.hisip[2] = 0;
+  //      ether.hisip[3] = 124;
+  //      ether.hisport = 3080;
+
+  printf("starting while loop\n");
+  while (1) {
+    uint16_t len = ether.packetReceive();
+    uint16_t pos = ether.packetLoop(len);
+
+    if (pos) { // check if valid tcp data is received
+      if (strstr((char *)Ethernet::buffer + pos, "GET /?DATA=")) {
+        char *cStr[12];
+        memcpy(cStr, Ethernet::buffer + pos + 10, 12);
+        std::string delimiter = "+";
+        std::string s((const char *)cStr);
+
+        size_t pos = 0;
+        std::string token;
+        int cols[3];
+        int i = 0;
+        while ((pos = s.find(delimiter)) != std::string::npos) {
+          token = s.substr(0, pos);
+          cols[i] = atoi(token.c_str());
+          i++;
+          i %= 3;
+          s.erase(0, pos + delimiter.length());
+        }
+
+        cols[2] = atoi(s.c_str());
+        printf("sendPostCmd starting\n");
+        printf("hisip: %d %d %d %d\n", ether.hisip[0], ether.hisip[1],
+               ether.hisip[2], ether.hisip[3]);
+        // sendPostCmd(cols[0], cols[1], cols[2]);
+        sendPostCmd();
+      }
+      ether.httpServerReply(homePage()); // send web page data
+    }
+  }
+
+  return 0;
+}
+
 
 #endif

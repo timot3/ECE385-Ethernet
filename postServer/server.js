@@ -10,7 +10,7 @@ var net = require('net');
 app.use(bodyParser.json());
 
 app.post('/sendCommand', (req, res) => {
-  console.log("COMMAND: " + req.body.test);
+  console.log("COMMAND: " + req.body.color);
   res.json({connection: "Received command"});
 });
 

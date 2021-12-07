@@ -690,6 +690,18 @@ void EtherCard::httpPost(const char *urlbuf, const char *hoststr,
                         &www_client_internal_datafill_cb, hisport);
 }
 
+void EtherCard::httpPost(const char *urlbuf, const char *hoststr,
+                         const char *additionalheaderline, const char *postval,
+                         void (*callback)(uint8_t, uint16_t, uint16_t), uint16_t port) {
+  client_urlbuf = urlbuf;
+  client_hoststr = hoststr;
+  client_additionalheaderline = additionalheaderline;
+  client_postval = postval;
+  client_browser_cb = callback;
+  www_fd = clientTcpReq(&www_client_internal_result_cb,
+                        &www_client_internal_datafill_cb, port);
+}
+
 static uint16_t tcp_datafill_cb(uint8_t fd) {
        uint16_t len = Stash::length();
        Stash::extract(0, len, EtherCard::tcpOffset());

@@ -259,6 +259,10 @@ public:
                        const char *additionalheaderline, const char *postval,
                        void (*callback)(uint8_t, uint16_t, uint16_t));
 
+  static void httpPost(const char *urlbuf, const char *hoststr,
+                       const char *additionalheaderline, const char *postval,
+                       void (*callback)(uint8_t, uint16_t, uint16_t), uint16_t port);
+
   /**   @brief  Send NTP request
    *     @param  ntpip IP address of NTP server
    *     @param  srcport IP port to send from

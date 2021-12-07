@@ -2,7 +2,7 @@
 #include <system.h>
 
 // Set to 0 to disable keyboard code
-#define USING_KEYBOARD 0
+#define USING_KEYBOARD 1
 
 // 0x00 = pinging, 0x01 = fetch data from website, 0x02 = host uptime website, 0x03 = post request
 // 0x04 = get user input from site, 0x05 = set alma lights from site
@@ -651,6 +651,56 @@ BufferFiller bfill;
 char keyPressedArr[50];
 int locInArr = 0;
 
+#if USING_KEYBOARD
+extern HID_DEVICE hid_device;
+
+static BYTE addr = 1; // hard-wired USB address
+const char *const devclasses[] = {" Uninitialized", " HID Keyboard",
+                                  " HID Mouse", " Mass storage"};
+
+static char chars[57] = {'0','0','0','0','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','1','2','3','4','5','6','7','8','9','0','\n','0','\b','\t',' ','-','=','[',']','\\','0',';','\'','`',',','.'};
+
+BYTE GetDriverandReport() {
+  BYTE i;
+  BYTE rcode;
+  BYTE device = 0xFF;
+  BYTE tmpbyte;
+
+  DEV_RECORD *tpl_ptr;
+  printf("Reached USB_STATE_RUNNING (0x40)\n");
+  for (i = 1; i < USB_NUMDEVICES; i++) {
+    tpl_ptr = GetDevtable(i);
+    if (tpl_ptr->epinfo != NULL) {
+      printf("Device: %d", i);
+      printf("%s \n", devclasses[tpl_ptr->devclass]);
+      device = tpl_ptr->devclass;
+    }
+  }
+  // Query rate and protocol
+  rcode = XferGetIdle(addr, 0, hid_device.interface, 0, &tmpbyte);
+  if (rcode) { // error handling
+    printf("GetIdle Error. Error code: ");
+    printf("%x \n", rcode);
+  } else {
+    printf("Update rate: ");
+    printf("%x \n", tmpbyte);
+  }
+  printf("Protocol: ");
+  rcode = XferGetProto(addr, 0, hid_device.interface, &tmpbyte);
+  if (rcode) { // error handling
+    printf("GetProto Error. Error code ");
+    printf("%x \n", rcode);
+  } else {
+    printf("%d \n", tmpbyte);
+  }
+  return device;
+}
+
+void setKeycode(WORD keycode) {
+  IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_BASE, keycode);
+}
+#endif
+
 static uint16_t homePage() {
   bfill = ether.tcpOffset();
   bfill.emit_p("HTTP/1.0 200 OK\r\n"
@@ -660,17 +710,36 @@ static uint16_t homePage() {
                 "<title>ECE 385 FPGA Server</title>"
                 "<label for=n1>Red: </label><input id=n1 type=number value=255><br><label for=n2>Green: </label><input id=n2 type=number value=255>"
                 "<br><label for=n3>Blue: </label><input id=n3 type=number value=255><br>"
-                "<button onclick=mF()>Send Color</button><script>function mF() {fetch('http://www.alma.lol/sendCommand', {method: 'POST',body:"
+                "<button onclick=mF()>Send Color</button><br><p>last 50 keys pressed: $S$</p></br>"
+                "<script>function mF() {fetch('http://www.alma.lol/sendCommand', {method: 'POST',body:"
                 " \"{\\\"color\\\": \\\"{\\\\\\\"senderUID\\\\\\\":\\\\\\\"10000000\\\\\\\",\\\\\\\"receiverUID\\\\\\\":\\\\\\\"10203FFF\\\\\\\""
                 ",\\\\\\\"functionID\\\\\\\":\\\\\\\"0\\\\\\\",\\\\\\\"data\\\\\\\":[\"+parseInt(document.getElementById(\"n1\").value)+\",\"+"
                 "parseInt(document.getElementById(\"n2\").value)+\",\"+parseInt(document.getElementById(\"n3\").value)+\"]}\\\"}\",headers: "
-                "{'Content-type': 'application/json; charset=UTF-8'}}).then(response => response.json()).then(json => {console.log(json);});}</script>");
+                "{'Content-type': 'application/json; charset=UTF-8'}}).then(response => response.json()).then(json => {console.log(json);});}</script>",
+                keyPressedArr);
 
   return bfill.position();
 }
 
 int main() {
   printf("\n[Set Lights Server]\n");
+
+#if USING_KEYBOARD
+  BYTE rcode;
+  BOOT_KBD_REPORT kbdbuf;
+
+  BYTE runningdebugflag = 0; // flag to dump out a bunch of information when we
+                             // first get to USB_STATE_RUNNING
+  BYTE errorflag = 0; // flag once we get an error device so we don't keep
+                      // dumping out state info
+  BYTE device;
+  WORD keycode;
+
+  printf("initializing MAX3421E...\n");
+  MAX3421E_init();
+  printf("initializing USB...\n");
+  USB_init();
+#endif
 
   // Change 'SS' to your Slave Select pin, if you arn't using the default pin
   if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
@@ -682,6 +751,50 @@ int main() {
 
     if (pos)                             // check if valid tcp data is received
       ether.httpServerReply(homePage()); // send web page data
+
+#if USING_KEYBOARD
+    MAX3421E_Task();
+    USB_Task();
+    if (GetUsbTaskState() == USB_STATE_RUNNING) {
+      if (!runningdebugflag) {
+        runningdebugflag = 1;
+        device = GetDriverandReport();
+      } else if (device == 1) {
+        // run keyboard debug polling
+        rcode = kbdPoll(&kbdbuf);
+        if (rcode == hrNAK) {
+          continue; // NAK means no new data
+        } else if (rcode) {
+          continue;
+        }
+
+        if (kbdbuf.keycode[0] > 0 && kbdbuf.keycode[0] < 57) {
+        	keyPressedArr[locInArr] = chars[kbdbuf.keycode[0]];
+        	locInArr++;
+        	locInArr %= 50;
+        }
+
+        setKeycode(kbdbuf.keycode[0]);
+      }
+    } else if (GetUsbTaskState() == USB_STATE_ERROR) {
+      if (!errorflag) {
+        errorflag = 1;
+        printf("USB Error State\n");
+        // print out string descriptor here
+      }
+    } else { // not in USB running state
+
+      printf("USB task state: ");
+      printf("%x\n", GetUsbTaskState());
+      if (runningdebugflag) { // previously running, reset USB hardware just to
+                              // clear out any funky state, HS/FS etc
+        runningdebugflag = 0;
+        MAX3421E_init();
+        USB_init();
+      }
+      errorflag = 0;
+    }
+#endif
   }
 
   return 0;

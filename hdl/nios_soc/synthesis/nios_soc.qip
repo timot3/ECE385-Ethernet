@@ -2,7 +2,7 @@ set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_TOOL_NAME 
 set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_TOOL_VERSION "18.1"
 set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_TOOL_ENV "Qsys"
 set_global_assignment -library "nios_soc" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../nios_soc.sopcinfo"]
-set_global_assignment -entity "nios_soc" -library "nios_soc" -name SLD_INFO "QSYS_NAME nios_soc HAS_SOPCINFO 1 GENERATION_ID 1638686907"
+set_global_assignment -entity "nios_soc" -library "nios_soc" -name SLD_INFO "QSYS_NAME nios_soc HAS_SOPCINFO 1 GENERATION_ID 1638949774"
 set_global_assignment -library "nios_soc" -name MISC_FILE [file join $::quartus(qip_path) "../nios_soc.cmp"]
 set_global_assignment -library "nios_soc" -name SLD_FILE [file join $::quartus(qip_path) "nios_soc.regmap"]
 set_global_assignment -library "nios_soc" -name SLD_FILE [file join $::quartus(qip_path) "nios_soc.debuginfo"]
@@ -16,7 +16,7 @@ set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_COMPONENT_
 set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_COMPONENT_REPORT_HIERARCHY "On"
 set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_COMPONENT_INTERNAL "Off"
 set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_COMPONENT_VERSION "MS4w"
-set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTYzODY4NjkwNw==::QXV0byBHRU5FUkFUSU9OX0lE"
+set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTYzODk0OTc3NA==::QXV0byBHRU5FUkFUSU9OX0lE"
 set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfRkFNSUxZ::TUFYIDEw::QXV0byBERVZJQ0VfRkFNSUxZ"
 set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0U=::MTBNNTBEQUY0ODRDN0c=::QXV0byBERVZJQ0U="
 set_global_assignment -entity "nios_soc" -library "nios_soc" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfU1BFRURHUkFERQ==::Nw==::QXV0byBERVZJQ0VfU1BFRURHUkFERQ=="
@@ -1368,15 +1368,15 @@ set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quart
 set_global_assignment -library "nios_soc" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/nios_soc_onchip_memory2_0.hex"]
 set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_onchip_memory2_0.v"]
 set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0.v"]
-set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_debug_slave_tck.v"]
 set_global_assignment -library "nios_soc" -name SDC_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu.sdc"]
-set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_test_bench.v"]
 set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu.v"]
 set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_debug_slave_sysclk.v"]
+set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_debug_slave_tck.v"]
+set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_debug_slave_wrapper.v"]
+set_global_assignment -library "nios_soc" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_ociram_default_contents.mif"]
 set_global_assignment -library "nios_soc" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_rf_ram_a.mif"]
 set_global_assignment -library "nios_soc" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_rf_ram_b.mif"]
-set_global_assignment -library "nios_soc" -name SOURCE_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_ociram_default_contents.mif"]
-set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_debug_slave_wrapper.v"]
+set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_nios2_gen2_0_cpu_test_bench.v"]
 set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_keycode.v"]
 set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_jtag_uart_0.v"]
 set_global_assignment -library "nios_soc" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/nios_soc_hex_digits_pio.v"]

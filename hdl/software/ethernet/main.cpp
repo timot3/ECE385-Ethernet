@@ -741,16 +741,16 @@ int main() {
   USB_init();
 #endif
 
-  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
-  if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
-    printf("Failed to access Ethernet controller\n");
-  ether.staticSetup(myip);
+//  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
+//  if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
+//    printf("Failed to access Ethernet controller\n");
+//  ether.staticSetup(myip);
   while (1) {
-    uint16_t len = ether.packetReceive();
-    uint16_t pos = ether.packetLoop(len);
-
-    if (pos)                             // check if valid tcp data is received
-      ether.httpServerReply(homePage()); // send web page data
+//    uint16_t len = ether.packetReceive();
+//    uint16_t pos = ether.packetLoop(len);
+//
+//    if (pos)                             // check if valid tcp data is received
+//      ether.httpServerReply(homePage()); // send web page data
 
 #if USING_KEYBOARD
     MAX3421E_Task();

@@ -2,7 +2,7 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 import arrow from "./arrow.svg"
 
-const sendUrl = "http://192.168.0.124:3080/sendPress";
+const sendUrl = "/sendPress";
 // const sendUrl = "http://alma.lol:120/sendPress";
 
 class App extends React.Component {

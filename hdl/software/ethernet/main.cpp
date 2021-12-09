@@ -6,7 +6,7 @@
 
 // 0x00 = pinging, 0x01 = fetch data from website, 0x02 = host uptime website, 0x03 = post request
 // 0x04 = get user input from site, 0x05 = set alma lights from site
-#define PROG_NUM 0x05
+#define PROG_NUM 0x00
 
 #include "EtherCard/EtherCard.h"
 #include "altera_avalon_pio_regs.h"

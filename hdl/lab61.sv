@@ -30,6 +30,8 @@ module lab61 (
 
       ///////// Clocks /////////
       input     MAX10_CLK1_50,
+		
+		input    [ 1: 0]   KEY,
 
       ///////// GPIO /////////
 	
@@ -77,7 +79,7 @@ module lab61 (
 				  
 	logic [1:0] SPI0_CS_N;
 	logic SPI0_SCLK, SPI0_MISO, SPI0_MOSI, USB_GPX, USB_IRQ, USB_RST;
-	logic [9:0] drawxsig, drawysig, ballxsig, ballysig, ballsizesig;
+	logic [9:0] drawxsig, drawysig, ballxsig, ballysig, ballsizesig, paddleLxsig, paddleLysig, paddleLsizesig, paddleRxsig, paddleRysig, paddleRsizesig;
 	logic Reset_h, vssig, blank, sync, VGA_Clk;
 	logic [7:0] Red, Blue, Green;
 	logic [7:0] keycode;
@@ -141,6 +143,8 @@ module lab61 (
 	assign VGA_R = Red[7:4];
 	assign VGA_B = Blue[7:4];
 	assign VGA_G = Green[7:4];
+	
+	assign {Reset_h}=~ (KEY[0]);
 	
 	
 	nios_soc u0 (
@@ -227,9 +231,15 @@ module lab61 (
 	//                        output logic [7:0]  Red, Green, Blue );
 		 color_mapper color_m (  .BallX(ballxsig),
 										 .BallY(ballysig),
+										 .paddleLX(paddleLxsig),
+										 .paddleLY(paddleLysig),
+										 .paddleRX(paddleRxsig),
+										 .paddleRY(paddleRysig),
 										 .DrawX(drawxsig),
 										 .DrawY(drawysig),
 										 .Ball_size(ballsizesig),
+										 .Paddle_sizeL(paddleLsizesig),
+										 .Paddle_sizeR(paddleRsizesig),
 										 .Red,
 										 .Green,
 										 .Blue
@@ -241,15 +251,27 @@ module lab61 (
 //					input [7:0] keycode,
 //					input isLeft,
 //               output [9:0]  paddleTop, paddleBottom, paddleEdge, paddleWidth);
-		paddle paddleLeft (		.Reset(Reset_h),
-										.frame_clk(VGA_VS),
-										.keycode(keycode),
-										.isLeft(1'b1),
-										.paddleTop(leftPaddleTop),
-										.paddleBottom(leftPaddleBottom),
-										.paddleLeftEdge(leftPaddleLeftEdge),
-										.paddleRightEdge(leftPaddleRightEdge),
-		);
+
+			
+		 paddle paddleLeft (     .Reset(Reset_h),
+										 .frame_clk(VGA_VS),
+										 .keycode(keycode),
+										 .isLeft(1'b1),
+										 .BallX(paddleLxsig),
+										 .BallY(paddleLysig),
+										 .BallS(paddleLsizesig)
+		 );
+
+		 
+		 paddle paddleRight (    .Reset(Reset_h),
+										 .frame_clk(VGA_VS),
+										 .keycode(keycode),
+										 .isLeft(1'b0),
+										 .BallX(paddleRxsig),
+										 .BallY(paddleRysig),
+										 .BallS(paddleRsizesig)
+		 );
+
 
 											 
 				//Instantiate additional FPGA fabric modules as needed		  

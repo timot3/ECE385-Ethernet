@@ -13,12 +13,11 @@
 //-------------------------------------------------------------------------
 
 
-module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
-							 input logic [9:0] leftPaddleTop, leftPaddleBottom, rightPaddleTop, rightPaddleBottom,
+module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size, paddleLX, paddleLY, Paddle_sizeL, paddleRX, paddleRY, Paddle_sizeR,
                         output logic [7:0]  Red, Green, Blue );
-
-    logic ball_on, leftPaddleOn;
-        
+								
+    logic ball_on;
+    logic plOn, pROn;
     /* Old Ball: Generated square box by checking if the current pixel is within a square of length
     2*Ball_Size, centered at (BallX, BallY).  Note that this requires unsigned comparisons.
         
@@ -37,33 +36,27 @@ module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
     assign DistY = DrawY - BallY;
     assign Size = Ball_size;
 	 
-	
-	
-	parameter leftPaddleLeftEdge = 0;
-	parameter leftPaddleRightEdge = 4;
-	
-	parameter rightPaddleLeftEdge = 635;
-	parameter rightPaddleRightEdge = 649;
-	
-	parameter [9:0] paddleYMin=0;       // Topmost point on the Y axis
-   parameter [9:0] paddleYMax=479;     // Bottommost point on the Y axis
-	
+	 
+	 logic [9:0] pWidth, pHeight;
+	 assign pWidth = 10'h02F;
+	 assign pHeight = 10'h002;
         
     always_comb
     begin:Ball_on_proc
         if ( ( DistX*DistX + DistY*DistY) <= (Size * Size) ) 
-            leftPaddleOn = 1'b1;
-        else 
-            leftPaddleOn = 1'b0;
-	  end 
-	  
-	 always_comb
-    begin:leftPaddleProc
-        if ( DrawX >=  leftPaddleLeftEdge && DrawX <= leftPaddleRightEdge &&
-				 DrawY >= leftPaddleTop && DrawY <= leftPaddleBottom) 
             ball_on = 1'b1;
         else 
             ball_on = 1'b0;
+				
+        if ( (paddleLY - pWidth) <= DrawY && (paddleLY + pWidth) >= DrawY && (paddleLX - pHeight) <= DrawX && (paddleLX + pHeight) >= DrawX) 
+            plOn = 1'b1;
+        else 
+            plOn = 1'b0;
+				
+		  if ( (paddleRY - pWidth) <= DrawY && (paddleRY + pWidth) >= DrawY && (paddleRX - pHeight) <= DrawX && (paddleRX + pHeight) >= DrawX) 
+            pROn = 1'b1;
+        else 
+            pROn = 1'b0;
 	  end 
         
     always_comb
@@ -73,19 +66,27 @@ module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
             Red = 8'hff;
             Green = 8'h55;
             Blue = 8'h00;
-        end 
-		  else if (leftPaddleOn == 1'b1) begin // left paddle
-		      Red = 8'hff;
-            Green = 8'h00;
+        end
+			else if((plOn==1'b1))
+			begin
+				Red = 8'hff;
+            Green = 8'h55;
             Blue = 8'h00;
-		  end
+			end
 		  
+			else if((pROn==1'b1))
+			begin
+				Red = 8'hff;
+            Green = 8'h55;
+            Blue = 8'h00;
+			end
         else 
         begin 
             Red = 8'h00; 
             Green = 8'h00;
-            Blue = 8'h7f - DrawX[9:5];
+            Blue = 8'h7f - DrawX[9:3];
         end      
     end 
 
 endmodule
+

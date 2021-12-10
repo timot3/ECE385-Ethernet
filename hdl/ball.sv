@@ -21,7 +21,7 @@ module  ball (  input Reset, frame_clk,
 				output [3:0] leftScore, rightScore);
     
     logic [9:0] Ball_X_Pos, Ball_X_Motion, Ball_Y_Pos, Ball_Y_Motion, Ball_Size;
-        logic plOn, pROn;
+        logic plOn, pROn, handledCollision;
         
     parameter [9:0] Ball_X_Center=320;  // Center position on the X axis
     parameter [9:0] Ball_Y_Center=240;  // Center position on the Y axis
@@ -49,6 +49,7 @@ module  ball (  input Reset, frame_clk,
             pROn = 1'b1;
         else 
             pROn = 1'b0;
+
     end
 
     always_ff @ (posedge Reset or posedge frame_clk )
@@ -63,9 +64,14 @@ module  ball (  input Reset, frame_clk,
                 
         else 
             begin 
-                if (pROn) begin
-                    Ball_Y_Pos <= 10'h078;  // Update ball position
-                    Ball_X_Pos <= 10'h078;
+                if (pROn) begin // hit right paddle, bounce!!
+                    // Ball_Y_Pos <= 10'h078;  // Update ball position
+                    // Ball_X_Pos <= 10'h078;
+                    Ball_X_Motion <= (~ (Ball_X_Motion) + 1'b1);
+                    
+                    Ball_Y_Pos <= (Ball_Y_Pos - Ball_Y_Step);  // Update ball position
+                    Ball_X_Pos <= (Ball_X_Pos - Ball_X_Step);
+
                 end
                 // if(isCollidingR == 1'b1 || isCollidingL == 1'b1) begin
 
@@ -75,8 +81,6 @@ module  ball (  input Reset, frame_clk,
 								
                 //   //      Ball_Y_Motion <= (~ (Ball_Y_Step) + 1'b1);
 
-                //         // Ball_Y_Pos <= (Ball_Y_Pos - Ball_Y_Motion);  // Update ball position
-                //         // Ball_X_Pos <= (Ball_X_Pos - Ball_X_Motion);
                 //         Ball_Y_Pos <= 10'h078;  // Update ball position
                 //         Ball_X_Pos <= 10'h078;
                     

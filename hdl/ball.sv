@@ -42,7 +42,7 @@ module  ball (  input Reset, frame_clk,
 
     // Always comb to detect collisions between paddles and ball
     always_comb begin
-        if ( (paddleLY - pWidth) <= Ball_Y_Pos && (paddleLY + pWidth) >= Ball_Y_Pos && (paddleLX - pHeight) <= Ball_X_Pos && (paddleLX + pHeight) >= Ball_X_Pos) begin
+        if ((paddleLY - pWidth) <= Ball_Y_Pos && (paddleLY + pWidth) >= Ball_Y_Pos && (paddleLX - pHeight) <= Ball_X_Pos && (paddleLX + pHeight) >= Ball_X_Pos) begin
             if ((paddleLY + pWidth) >= Ball_Y_Pos) begin
                 leftCollisionTop = 1'b1;
                 leftCollisionBottom = 1'b0;
@@ -56,7 +56,7 @@ module  ball (  input Reset, frame_clk,
             leftCollisionBottom = 1'b0;
         end
 
-        if ( (paddleRY - pWidth) <= Ball_Y_Pos && (paddleRY + pWidth) >= Ball_Y_Pos && (paddleRX - pHeight) <= Ball_X_Pos && (paddleRX + pHeight) >= Ball_X_Pos) begin
+        if ((paddleRY - pWidth) <= Ball_Y_Pos && (paddleRY + pWidth) >= Ball_Y_Pos && (paddleRX - pHeight) <= Ball_X_Pos && (paddleRX + pHeight) >= Ball_X_Pos) begin
             if ((paddleRY + pWidth) <= Ball_Y_Pos) begin
                 rightCollisionTop = 1'b1;
                 rightCollisionBottom = 1'b0;
@@ -70,7 +70,7 @@ module  ball (  input Reset, frame_clk,
             rightCollisionBottom = 1'b0;
         end
 	
-        if ( (paddleRY - pWidth) <= Ball_Y_Pos && (paddleRY + pWidth) >= Ball_Y_Pos && (paddleRX - pHeight) <= Ball_X_Pos && (paddleRX + pHeight) >= Ball_X_Pos) 
+        if ((paddleRY - pWidth) <= Ball_Y_Pos && (paddleRY + pWidth) >= Ball_Y_Pos && (paddleRX - pHeight) <= Ball_X_Pos && (paddleRX + pHeight) >= Ball_X_Pos) 
             pROn = 1'b1;
         else 
             pROn = 1'b0;
@@ -78,7 +78,7 @@ module  ball (  input Reset, frame_clk,
     end
 
     // Always ff for movement of ball
-    always_ff @ (posedge Reset or posedge frame_clk )
+    always_ff @ (posedge Reset or posedge frame_clk)
     begin: Move_Ball
         if (Reset)  // Asynchronous Reset
             begin

@@ -55,7 +55,7 @@ module  paddle (input Reset, frame_clk,
 				Ball_X_Motion <= 0;
 			end
                         
-			else if ( (Ball_Y_Pos - Ball_Size) <= Ball_Y_Min) begin // Ball is at the top edge, BOUNCE!
+			else if ( (Ball_Y_Pos - Ball_Size - Ball_Size) <= Ball_Y_Min) begin // Ball is at the top edge, BOUNCE!
 				Ball_Y_Motion <= 0;
 				Ball_X_Motion <= 0;
 			end
@@ -78,6 +78,9 @@ module  paddle (input Reset, frame_clk,
 						Ball_Y_Motion <= -Ball_Y_Step;//W
 						Ball_X_Motion <= 0;
 						if ((Ball_Y_Pos - Ball_Size - Ball_Size - Ball_Size) <= Ball_Y_Min) begin
+							Ball_Y_Motion <= 0;
+							Ball_X_Motion <= 0;
+						end else if(Ball_Y_Pos <= 10'h035) begin // Make sure paddle doesn't go off screen
 							Ball_Y_Motion <= 0;
 							Ball_X_Motion <= 0;
 						end
@@ -103,6 +106,9 @@ module  paddle (input Reset, frame_clk,
 						Ball_Y_Motion <= -Ball_Y_Step;//W
 						Ball_X_Motion <= 0;
 						if ((Ball_Y_Pos - Ball_Size - Ball_Size - Ball_Size) <= Ball_Y_Min) begin
+							Ball_Y_Motion <= 0;
+							Ball_X_Motion <= 0;
+						end else if(Ball_Y_Pos <= 10'h035) begin // Make sure paddle doesn't go off screen
 							Ball_Y_Motion <= 0;
 							Ball_X_Motion <= 0;
 						end

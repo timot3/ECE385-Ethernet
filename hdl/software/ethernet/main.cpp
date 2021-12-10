@@ -1,3 +1,6 @@
+// EtherCard library based on https://github.com/njh/EtherCard and edited
+// to support NIOS II
+
 #include <stdio.h>
 #include <system.h>
 

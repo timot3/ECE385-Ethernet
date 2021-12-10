@@ -3,7 +3,7 @@ module nios_soc (
 	clk_clk,
 	gpio_wire_export,
 	hex_digits_export,
-	keycode_export,
+	keycode_l_export,
 	led_wire_export,
 	reset_reset_n,
 	sdram_clk_clk,
@@ -22,12 +22,13 @@ module nios_soc (
 	spi0_SS_n,
 	usb_gpx_export,
 	usb_irq_export,
-	usb_rst_export);	
+	usb_rst_export,
+	keycode_r_export);	
 
 	input		clk_clk;
 	output	[9:0]	gpio_wire_export;
 	output	[15:0]	hex_digits_export;
-	output	[7:0]	keycode_export;
+	output	[7:0]	keycode_l_export;
 	output	[7:0]	led_wire_export;
 	input		reset_reset_n;
 	output		sdram_clk_clk;
@@ -47,4 +48,5 @@ module nios_soc (
 	input		usb_gpx_export;
 	input		usb_irq_export;
 	output		usb_rst_export;
+	output	[7:0]	keycode_r_export;
 endmodule

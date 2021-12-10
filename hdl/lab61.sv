@@ -30,6 +30,8 @@ module lab61 (
 
       ///////// Clocks /////////
       input     MAX10_CLK1_50,
+		
+		input    [ 1: 0]   KEY,
 
       ///////// GPIO /////////
 	
@@ -62,12 +64,32 @@ module lab61 (
 
       ///////// ARDUINO /////////
       inout    [15: 0]   ARDUINO_IO,
-      inout              ARDUINO_RESET_N 
+      inout              ARDUINO_RESET_N,
+		
+		
+		
+		///////// VGA /////////
+      output             VGA_HS,
+      output             VGA_VS,
+      output   [ 3: 0]   VGA_R,
+      output   [ 3: 0]   VGA_G,
+      output   [ 3: 0]   VGA_B
 
 );
 				  
 	logic [1:0] SPI0_CS_N;
 	logic SPI0_SCLK, SPI0_MISO, SPI0_MOSI, USB_GPX, USB_IRQ, USB_RST;
+	logic [9:0] drawxsig, drawysig, ballxsig, ballysig, ballsizesig, paddleLxsig, paddleLysig, paddleLsizesig, paddleRxsig, paddleRysig, paddleRsizesig;
+	logic Reset_h, vssig, blank, sync, VGA_Clk;
+	logic [7:0] Red, Blue, Green;
+	logic [7:0] keycode_l, keycode_r;
+	
+	
+    logic [9:0] leftPaddleTop, leftPaddleBottom, rightPaddleTop, rightPaddleBottom;
+	 logic [9:0] leftPaddleLeftEdge,	 leftPaddleRightEdge, rightPaddleLeftEdge, rightPaddleRightEdge;
+
+	
+	
 	assign ARDUINO_IO[9] = SPI0_CS_N[0];
 
 	assign ARDUINO_IO[13] = SPI0_SCLK;
@@ -117,6 +139,14 @@ module lab61 (
 	assign HEX2 = {1'b1, ~signs[0], 3'b111, ~hundreds[0], ~hundreds[0], 1'b1};
 	
 	
+	//Our A/D converter is only 12 bit
+	assign VGA_R = Red[7:4];
+	assign VGA_B = Blue[7:4];
+	assign VGA_G = Green[7:4];
+	
+	assign {Reset_h}=~ (KEY[0]);
+	
+	
 	nios_soc u0 (
 		.clk_clk                           (MAX10_CLK1_50),  //clk.clk
 		.reset_reset_n                     (1'b1),           //reset.reset_n
@@ -149,9 +179,116 @@ module lab61 (
 
 		//LEDs and GPIO
 		.led_wire_export(LEDR),	
+		.keycode_l_export(keycode_l),
+		.keycode_r_export(keycode_r),
+
 //		.gpio_wire_export(),
 		.hex_digits_export({hex_num_4, hex_num_3, hex_num_1, hex_num_0})
 	 );
+	 
+	 
+	 
+		 
+									// module  vga_controller (    input           Clk,        // 50 MHz clock
+	//                                             Reset,      // reset signal
+	//                             output logic    hs,         // Horizontal sync pulse.  Active low
+	//                                             vs,         // Vertical sync pulse.  Active low
+	//                                             pixel_clk,  // 25 MHz pixel clock output
+	//                                             blank,      // Blanking interval indicator.  Active low.
+	//                                             sync,       // Composite Sync signal.  Active low.  We don't use it in this lab,
+	//                                                         //   but the video DAC on the DE2 board requires an input for it.
+	//                             output [9:0]    DrawX,      // horizontal coordinate
+	//                                             DrawY );    // vertical coordinate
+	// VGA CONTROL SIGNALS FROM TOP-LEVEL OUTPUTS
+	//   output             VGA_HS,
+	//   output             VGA_VS,
+	//   output   [ 3: 0]   VGA_R,
+	//   output   [ 3: 0]   VGA_G,
+	//   output   [ 3: 0]   VGA_B,
+	  
+		 vga_controller vga_c (  .Clk(MAX10_CLK1_50),
+										 .Reset(Reset_h),
+										 .hs(VGA_HS),
+										 .vs(VGA_VS),
+										 .pixel_clk(VGA_Clk),
+										 .blank,
+										 .sync,
+										 .DrawX(drawxsig),
+										 .DrawY(drawysig)
+		 );
+
+	// module  ball (  input Reset, frame_clk,
+	//                 input [7:0] keycode,
+	//                 output [9:0]  BallX, BallY, BallS );
+
+
+
+	// module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
+	//                        output logic [7:0]  Red, Green, Blue );
+	logic isCollidingL, isCollidingR;
+		 color_mapper color_m (  .BallX(ballxsig),
+										 .BallY(ballysig),
+										 .paddleLX(paddleLxsig),
+										 .paddleLY(paddleLysig),
+										 .paddleRX(paddleRxsig),
+										 .paddleRY(paddleRysig),
+										 .DrawX(drawxsig),
+										 .DrawY(drawysig),
+										 .Ball_size(ballsizesig),
+										 .Paddle_sizeL(paddleLsizesig),
+										 .Paddle_sizeR(paddleRsizesig),
+										 .Red,
+										 .Green,
+										 .Blue,
+										 .isCollidingL, 
+										 .isCollidingR
+		 );
+		 
+
+		 
+//		 module  paddle ( input Reset, frame_clk,
+//					input [7:0] keycode,
+//					input isLeft,
+//               output [9:0]  paddleTop, paddleBottom, paddleEdge, paddleWidth);
+
+			
+		 paddle paddleLeft (     .Reset(Reset_h),
+										 .frame_clk(VGA_VS),
+										 .keycode(keycode_l),
+										 .isLeft(1'b1),
+										 .BallX(paddleLxsig),
+										 .BallY(paddleLysig),
+										 .BallS(paddleLsizesig)
+		 );
+
+		 
+		 paddle paddleRight (    .Reset(Reset_h),
+										 .frame_clk(VGA_VS),
+										 .keycode(keycode_r),
+										 .isLeft(1'b0),
+										 .BallX(paddleRxsig),
+										 .BallY(paddleRysig),
+										 .BallS(paddleRsizesig)
+		 );
+		 
+		 logic [3:0] lScore, rScore;
+		 
+		 ball b (               .Reset(Reset_h),
+								.frame_clk(VGA_VS),
+								.keycode(keycode_l),
+								.BallX(ballxsig),
+								.BallY(ballysig),
+								.BallS(ballsizesig),
+								.Paddle_sizeL(paddleLsizesig),
+								.Paddle_sizeR(paddleRsizesig),
+								.paddleLX(paddleLxsig),
+								.paddleLY(paddleLysig),
+								.paddleRX(paddleRxsig),
+								.paddleRY(paddleRysig),
+								.leftScore(lScore),
+								.rightScore(rScore)
+		 );
+
 
 											 
 				//Instantiate additional FPGA fabric modules as needed		  

@@ -2,7 +2,7 @@
 		.clk_clk           (<connected-to-clk_clk>),           //        clk.clk
 		.gpio_wire_export  (<connected-to-gpio_wire_export>),  //  gpio_wire.export
 		.hex_digits_export (<connected-to-hex_digits_export>), // hex_digits.export
-		.keycode_export    (<connected-to-keycode_export>),    //    keycode.export
+		.keycode_l_export  (<connected-to-keycode_l_export>),  //  keycode_l.export
 		.led_wire_export   (<connected-to-led_wire_export>),   //   led_wire.export
 		.reset_reset_n     (<connected-to-reset_reset_n>),     //      reset.reset_n
 		.sdram_clk_clk     (<connected-to-sdram_clk_clk>),     //  sdram_clk.clk
@@ -21,6 +21,7 @@
 		.spi0_SS_n         (<connected-to-spi0_SS_n>),         //           .SS_n
 		.usb_gpx_export    (<connected-to-usb_gpx_export>),    //    usb_gpx.export
 		.usb_irq_export    (<connected-to-usb_irq_export>),    //    usb_irq.export
-		.usb_rst_export    (<connected-to-usb_rst_export>)     //    usb_rst.export
+		.usb_rst_export    (<connected-to-usb_rst_export>),    //    usb_rst.export
+		.keycode_r_export  (<connected-to-keycode_r_export>)   //  keycode_r.export
 	);
 

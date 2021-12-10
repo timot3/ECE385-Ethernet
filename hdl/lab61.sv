@@ -121,22 +121,24 @@ module lab61 (
 	logic [3:0] hex_num_4, hex_num_3, hex_num_1, hex_num_0; //4 bit input hex digits
 	logic [1:0] signs;
 	logic [1:0] hundreds;
-	HexDriver hex_driver4 (hex_num_4, HEX4[6:0]);
-	assign HEX4[7] = 1'b1;
-	
-	HexDriver hex_driver3 (hex_num_3, HEX3[6:0]);
-	assign HEX3[7] = 1'b1;
-	
-	HexDriver hex_driver1 (hex_num_1, HEX1[6:0]);
-	assign HEX1[7] = 1'b1;
-	
-	HexDriver hex_driver0 (hex_num_0, HEX0[6:0]);
-	assign HEX0[7] = 1'b1;
+//	HexDriver hex_driver4 (hex_num_4, HEX4[6:0]);
+//	assign HEX4[7] = 1'b1;
+//	
+//	HexDriver hex_driver3 (hex_num_3, HEX3[6:0]);
+//	assign HEX3[7] = 1'b1;
+//	
+//	HexDriver hex_driver1 (hex_num_1, HEX1[6:0]);
+//	assign HEX1[7] = 1'b1;
+//	
+//	HexDriver hex_driver0 (hex_num_0, HEX0[6:0]);
+//	assign HEX0[7] = 1'b1;
 	
 	//fill in the hundreds digit as well as the negative sign
 	// Display ping on hex displays
-	assign HEX5 = {1'b1, ~signs[1], 3'b111, ~hundreds[1], ~hundreds[1], 1'b1};
-	assign HEX2 = {1'b1, ~signs[0], 3'b111, ~hundreds[0], ~hundreds[0], 1'b1};
+//	assign HEX5 = {1'b1, ~signs[1], 3'b111, ~hundreds[1], ~hundreds[1], 1'b1};
+//	assign HEX2 = {1'b1, ~signs[0], 3'b111, ~hundreds[0], ~hundreds[0], 1'b1};
+//	
+
 	
 	
 	//Our A/D converter is only 12 bit
@@ -183,7 +185,7 @@ module lab61 (
 		.keycode_r_export(keycode_r),
 
 //		.gpio_wire_export(),
-		.hex_digits_export({hex_num_4, hex_num_3, hex_num_1, hex_num_0})
+//		.hex_digits_export({hex_num_4, hex_num_3, hex_num_1, hex_num_0})
 	 );
 	 
 	 
@@ -288,6 +290,27 @@ module lab61 (
 								.leftScore(lScore),
 								.rightScore(rScore)
 		 );
+		 
+
+								
+					HexDriver		AHex0 (
+								.In0(rScore),
+								.Out0(HEX0) );
+					HexDriver		AHex1 (
+								.In0(lScore),
+								.Out0(HEX1) );
+					HexDriver		AHex2 (
+								.In0(4'b0),
+								.Out0(HEX2) );
+					HexDriver		AHex3 (
+								.In0(4'b0),
+								.Out0(HEX3) );
+					HexDriver		AHex4 (
+								.In0(4'b0),
+								.Out0(HEX4) );
+					HexDriver		AHex5 (
+								.In0(4'b0),
+								.Out0(HEX5) );
 
 
 											 

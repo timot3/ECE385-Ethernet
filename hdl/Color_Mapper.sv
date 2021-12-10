@@ -37,11 +37,11 @@ module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
     assign DistY = DrawY - BallY;
     assign Size = Ball_size;
 	 
-	 
-	 logic [9:0] pWidth, pHeight;
-	 assign pWidth = 10'h02F;
-	 assign pHeight = 10'h002;
+    logic [9:0] pWidth, pHeight;
+    assign pWidth = 10'h02F;
+    assign pHeight = 10'h002;
         
+    // Determine what we're drawing on screen at current location
     always_comb
     begin:Ball_on_proc
         if ( ( DistX*DistX + DistY*DistY) <= (Size * Size) ) 
@@ -60,6 +60,7 @@ module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
             pROn = 1'b0;
 	  end
 
+    // Determine if collision between paddle and ball is occuring
     always_comb begin
         if(ball_on == 1'b1 && plOn == 1'b1)
             isCollidingL = 1'b1;
@@ -71,7 +72,7 @@ module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
             isCollidingR = 1'b0;
     end 
 
-        
+    // Draw item to dispaly        
     always_comb
     begin:RGB_Display
         if ((ball_on == 1'b1)) 

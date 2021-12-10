@@ -15,7 +15,6 @@
 
 module  ball (  input Reset, frame_clk,
 				input [7:0] keycode,
-                // input isCollidingL, isCollidingR,
                 input logic [9:0] paddleLX, paddleLY, Paddle_sizeL, paddleRX, paddleRY, Paddle_sizeR,
                 output [9:0]  BallX, BallY, BallS,
 				output [3:0] leftScore, rightScore);
@@ -40,19 +39,19 @@ module  ball (  input Reset, frame_clk,
 
     assign Ball_Size = 6;  // assigns the value 4 as a 10-digit binary number, ie "0000000100"
 
+
+    // Always comb to detect collisions between paddles and ball
     always_comb begin
         if ( (paddleLY - pWidth) <= Ball_Y_Pos && (paddleLY + pWidth) >= Ball_Y_Pos && (paddleLX - pHeight) <= Ball_X_Pos && (paddleLX + pHeight) >= Ball_X_Pos) begin
             if ((paddleLY + pWidth) >= Ball_Y_Pos) begin
                 leftCollisionTop = 1'b1;
                 leftCollisionBottom = 1'b0;
 
-            end
-            else begin
+            end else begin
                 leftCollisionTop = 1'b0;
                 leftCollisionBottom = 1'b1;
             end
-        end
-        else begin
+        end else begin
             leftCollisionTop = 1'b0;
             leftCollisionBottom = 1'b0;
         end
@@ -62,27 +61,23 @@ module  ball (  input Reset, frame_clk,
                 rightCollisionTop = 1'b1;
                 rightCollisionBottom = 1'b0;
 
-            end
-            else begin
+            end else begin
                 rightCollisionTop = 1'b0;
                 rightCollisionBottom = 1'b1;
             end
-        end
-        else begin
+        end else begin
             rightCollisionTop = 1'b0;
             rightCollisionBottom = 1'b0;
         end
-
-            
-
-				
-		  if ( (paddleRY - pWidth) <= Ball_Y_Pos && (paddleRY + pWidth) >= Ball_Y_Pos && (paddleRX - pHeight) <= Ball_X_Pos && (paddleRX + pHeight) >= Ball_X_Pos) 
+	
+        if ( (paddleRY - pWidth) <= Ball_Y_Pos && (paddleRY + pWidth) >= Ball_Y_Pos && (paddleRX - pHeight) <= Ball_X_Pos && (paddleRX + pHeight) >= Ball_X_Pos) 
             pROn = 1'b1;
         else 
             pROn = 1'b0;
 
     end
 
+    // Always ff for movement of ball
     always_ff @ (posedge Reset or posedge frame_clk )
     begin: Move_Ball
         if (Reset)  // Asynchronous Reset
@@ -147,57 +142,27 @@ module  ball (  input Reset, frame_clk,
 
                 end
 
-
-                // if(isCollidingR == 1'b1 || isCollidingL == 1'b1) begin
-
-
-                //         Ball_X_Motion <= 0;
-                //         Ball_Y_Motion <= 0;
-								
-                //   //      Ball_Y_Motion <= (~ (Ball_Y_Step) + 1'b1);
-
-                //         Ball_Y_Pos <= 10'h078;  // Update ball position
-                //         Ball_X_Pos <= 10'h078;
-                    
-
-                // end 
-
-
                 else if ( (Ball_Y_Pos + Ball_Size) >= Ball_Y_Max ) begin // Ball is at the bottom edge, BOUNCE!
                     Ball_Y_Motion <= (~ (Ball_Y_Step) + 1'b1);  // 2's complement.
                     Ball_Y_Pos <= (Ball_Y_Pos + Ball_Y_Motion);  // Update ball position
                     Ball_X_Pos <= (Ball_X_Pos + Ball_X_Motion);
                 end
-                    
                 else if ( (Ball_Y_Pos - Ball_Size) <= Ball_Y_Min ) begin // Ball is at the top edge, BOUNCE!
                     Ball_Y_Motion <= Ball_Y_Step;
                     Ball_Y_Pos <= (Ball_Y_Pos + Ball_Y_Motion);  // Update ball position
                     Ball_X_Pos <= (Ball_X_Pos + Ball_X_Motion);
                 end
                 else if ( (Ball_X_Pos + Ball_Size) >= Ball_X_Max) begin // Ball is at the Right edge, die!
-                    // if(Ball_X_Pos <= rightPaddleTop && Ball_X_Pos >= rightPaddleBottom) begin
-                    //     // bounce
-                    //     Ball_X_Motion <= (~ (Ball_X_Step) + 1'b1);
-                    //     Ball_Y_Motion <= (~ (Ball_Y_Step) + 1'b1);
-
-                    //     Ball_Y_Pos <= (Ball_Y_Pos + Ball_Y_Motion);
-                    //     Ball_X_Pos <= (Ball_X_Pos + Ball_X_Motion);
-                    // end else begin
-                        //die
-                        Ball_Y_Pos <= Ball_Y_Center;
-                        Ball_X_Pos <= Ball_X_Center;
-                        leftScore <= leftScore + 1;
-                        Ball_X_Motion <= Ball_X_Step;
-                        Ball_Y_Motion <= 0;
-                    // end
+                    Ball_Y_Pos <= Ball_Y_Center;
+                    Ball_X_Pos <= Ball_X_Center;
+                    leftScore <= leftScore + 1;
+                    Ball_X_Motion <= Ball_X_Step;
+                    Ball_Y_Motion <= 0;
                 end
-                    
                 else if ( (Ball_X_Pos - Ball_Size) <= Ball_X_Min )  begin // Ball is at the Left edge, die!
-                    
                     Ball_Y_Pos <= Ball_Y_Center;
                     Ball_X_Pos <= Ball_X_Center;
                     rightScore <= rightScore + 1;
-                    
                     Ball_X_Motion <= (~ (Ball_X_Step) + 1'b1);  // 2's complement.
                     Ball_Y_Motion <= 0;
                                 
@@ -208,26 +173,12 @@ module  ball (  input Reset, frame_clk,
                     Ball_Y_Pos <= (Ball_Y_Pos + Ball_Y_Motion);  // Update ball position
                     Ball_X_Pos <= (Ball_X_Pos + Ball_X_Motion);
                 end 
-            end
-    
-
-            // ball bounce -- right paddle
-
-
-            // | 3
-            // | 2
-            // | 1
-            // | 0
- 
-                
+            end       
     end
         
     assign BallX = Ball_X_Pos;
-
     assign BallY = Ball_Y_Pos;
-
     assign BallS = Ball_Size;
-    
 
 endmodule
 

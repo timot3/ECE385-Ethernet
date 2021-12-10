@@ -28,12 +28,12 @@ module  paddle ( input Reset, frame_clk,
     parameter [9:0] Ball_X_Max=639;     // Rightmost point on the X axis
     parameter [9:0] Ball_Y_Min=0;       // Topmost point on the Y axis
     parameter [9:0] Ball_Y_Max=479;     // Bottommost point on the Y axis
-    parameter [9:0] Ball_Y_Step=6;      // Step size on the Y axis
+    parameter [9:0] Ball_Y_Step=1;      // Step size on the Y axis
 	 
 	 
 
 
-    assign Ball_Size = 4;  // assigns the value 4 as a 10-digit binary number, ie "0000000100"
+    assign Ball_Size = 10'd47;  // assigns the value 4 as a 10-digit binary number, ie "0000000100"
 
     always_ff @ (posedge Reset or posedge frame_clk )
     begin: Move_Ball
@@ -53,13 +53,13 @@ module  paddle ( input Reset, frame_clk,
             
         else 
         begin 
-                    if ( (Ball_Y_Pos + Ball_Size) >= Ball_Y_Max ) begin // Ball is at the bottom edge, BOUNCE!
-                        Ball_Y_Motion <= (~ (Ball_Y_Step) + 1'b1);  // 2's complement.
+                    if ( (Ball_Y_Pos + Ball_Size) >= Ball_Y_Max) begin // Ball is at the bottom edge, BOUNCE!
+                        Ball_Y_Motion <= 0;  // 2's complement.
                         Ball_X_Motion <= 0;
                     end
                         
-                    else if ( (Ball_Y_Pos - Ball_Size) <= Ball_Y_Min ) begin // Ball is at the top edge, BOUNCE!
-                        Ball_Y_Motion <= Ball_Y_Step;
+                    else if ( (Ball_Y_Pos - Ball_Size) <= Ball_Y_Min) begin // Ball is at the top edge, BOUNCE!
+                        Ball_Y_Motion <= 0;
                         Ball_X_Motion <= 0;
                     end
                     else begin
@@ -121,6 +121,11 @@ module  paddle ( input Reset, frame_clk,
                     
                     Ball_Y_Pos <= (Ball_Y_Pos + Ball_Y_Motion);  // Update ball position
                     Ball_X_Pos <= (Ball_X_Pos + Ball_X_Motion);
+
+					if(Ball_Y_Pos>Ball_Y_Max || Ball_Y_Pos < Ball_Y_Min)
+						begin
+							Ball_Y_Pos <= Ball_Size;
+						end
             
             
         /**************************************************************************************

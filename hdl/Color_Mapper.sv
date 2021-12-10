@@ -49,12 +49,12 @@ module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
         else 
             ball_on = 1'b0;
 				
-        if ( (paddleLY - pWidth) <= DrawY && (paddleLY + pWidth) >= DrawY && (paddleLX - pHeight) <= DrawX && (paddleLX + pHeight) >= DrawX) 
+        if (( (paddleLY - pWidth) <= DrawY || paddleLY - pWidth >= 10'd480) && (paddleLY + pWidth) >= DrawY && (paddleLX - pHeight) <= DrawX && (paddleLX + pHeight) >= DrawX) 
             plOn = 1'b1;
         else 
             plOn = 1'b0;
 				
-		  if ( (paddleRY - pWidth) <= DrawY && (paddleRY + pWidth) >= DrawY && (paddleRX - pHeight) <= DrawX && (paddleRX + pHeight) >= DrawX) 
+		  if ( ((paddleRY - pWidth) <= DrawY || paddleRY - pWidth >= 10'd480) && (paddleRY + pWidth) >= DrawY && (paddleRX - pHeight) <= DrawX && (paddleRX + pHeight) >= DrawX) 
             pROn = 1'b1;
         else 
             pROn = 1'b0;

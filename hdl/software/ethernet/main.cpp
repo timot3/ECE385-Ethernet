@@ -902,12 +902,12 @@ int main() {
       }
       ether.httpServerReply(homePage()); // send web page data
 
-      if (vals[0] != 0) {
+      //if (vals[0] != 0) {
       	setKeycodeL(vals[0]);
-      }
-      if (vals[2] != 0) {
+      //}
+      //if (vals[2] != 0) {
       	setKeycodeR(vals[2]);
-      }
+      //}
     }
   }
 

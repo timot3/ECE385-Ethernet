@@ -15,11 +15,13 @@
 
 module  ball (  input Reset, frame_clk,
 				input [7:0] keycode,
-				input [9:0] leftPaddleTop, leftPaddleBottom, rightPaddleTop, rightPaddleBottom,
+                // input isCollidingL, isCollidingR,
+                input logic [9:0] paddleLX, paddleLY, Paddle_sizeL, paddleRX, paddleRY, Paddle_sizeR,
                 output [9:0]  BallX, BallY, BallS,
 				output [3:0] leftScore, rightScore);
     
     logic [9:0] Ball_X_Pos, Ball_X_Motion, Ball_Y_Pos, Ball_Y_Motion, Ball_Size;
+        logic plOn, pROn;
         
     parameter [9:0] Ball_X_Center=320;  // Center position on the X axis
     parameter [9:0] Ball_Y_Center=240;  // Center position on the Y axis
@@ -31,7 +33,23 @@ module  ball (  input Reset, frame_clk,
     logic [9:0] Ball_X_Step = 1;      // Step size on the X axis
     logic [9:0] Ball_Y_Step = 1;      // Step size on the Y axis
 
+    logic [9:0] pWidth, pHeight;
+	 assign pWidth = 10'h02F;
+	 assign pHeight = 10'h002;
+
     assign Ball_Size = 4;  // assigns the value 4 as a 10-digit binary number, ie "0000000100"
+
+    always_comb begin
+        if ( (paddleLY - pWidth) <= Ball_Y_Pos && (paddleLY + pWidth) >= Ball_Y_Pos && (paddleLX - pHeight) <= Ball_X_Pos && (paddleLX + pHeight) >= Ball_X_Pos) 
+            plOn = 1'b1;
+        else 
+            plOn = 1'b0;
+				
+		  if ( (paddleRY - pWidth) <= Ball_Y_Pos && (paddleRY + pWidth) >= Ball_Y_Pos && (paddleRX - pHeight) <= Ball_X_Pos && (paddleRX + pHeight) >= Ball_X_Pos) 
+            pROn = 1'b1;
+        else 
+            pROn = 1'b0;
+    end
 
     always_ff @ (posedge Reset or posedge frame_clk )
     begin: Move_Ball
@@ -45,34 +63,27 @@ module  ball (  input Reset, frame_clk,
                 
         else 
             begin 
+                if (pROn) begin
+                    Ball_Y_Pos <= 10'h078;  // Update ball position
+                    Ball_X_Pos <= 10'h078;
+                end
+                // if(isCollidingR == 1'b1 || isCollidingL == 1'b1) begin
 
-                if((Ball_X_Pos + Ball_Size) >= rightPaddleBorder && (Ball_Y_Pos <= rightPaddleBottom) && (Ball_Y_Pos >=  rightPaddleTop)) begin
-                    // whereOnPaddle = (paddleBottom - BallY) / 5 // height = 20, divisionAmnt = 4, 20/4=5
-                    // case where on paddle:
-                    //     2'h0: // bottom of paddle
-                    //         begin
-                    //             Ball_X_Step = 
-                    //         end
-                    //     2'h1:
-                    //         begin
-                    //         end
-                    //     2'h2:
-                    //         begin
-                    //         end
-                    //     2'h3:
-                    //         begin
-                    //         end
-                    //     default: // not on paddle
-                    // endcase
 
-                        Ball_X_Motion <= (~ (Ball_X_Step) + 1'b1);
-                  //      Ball_Y_Motion <= (~ (Ball_Y_Step) + 1'b1);
+                //         Ball_X_Motion <= 0;
+                //         Ball_Y_Motion <= 0;
+								
+                //   //      Ball_Y_Motion <= (~ (Ball_Y_Step) + 1'b1);
 
-                        Ball_Y_Pos <= (Ball_Y_Pos - Ball_Y_Motion);  // Update ball position
-                        Ball_X_Pos <= (Ball_X_Pos - Ball_X_Motion);
+                //         // Ball_Y_Pos <= (Ball_Y_Pos - Ball_Y_Motion);  // Update ball position
+                //         // Ball_X_Pos <= (Ball_X_Pos - Ball_X_Motion);
+                //         Ball_Y_Pos <= 10'h078;  // Update ball position
+                //         Ball_X_Pos <= 10'h078;
                     
 
-                end 
+                // end 
+
+
                 // else if ( (Ball_Y_Pos + Ball_Size) >= Ball_Y_Max ) begin // Ball is at the bottom edge, BOUNCE!
                 //     Ball_Y_Motion <= (~ (Ball_Y_Step) + 1'b1);  // 2's complement.
                 //     Ball_Y_Pos <= (Ball_Y_Pos + Ball_Y_Motion);  // Update ball position

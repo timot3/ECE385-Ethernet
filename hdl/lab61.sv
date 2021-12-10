@@ -225,6 +225,7 @@ module lab61 (
 
 	// module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
 	//                        output logic [7:0]  Red, Green, Blue );
+	logic isCollidingL, isCollidingR;
 		 color_mapper color_m (  .BallX(ballxsig),
 										 .BallY(ballysig),
 										 .paddleLX(paddleLxsig),
@@ -238,7 +239,9 @@ module lab61 (
 										 .Paddle_sizeR(paddleRsizesig),
 										 .Red,
 										 .Green,
-										 .Blue
+										 .Blue,
+										 .isCollidingL, 
+										 .isCollidingR
 		 );
 		 
 
@@ -270,18 +273,20 @@ module lab61 (
 		 
 		 logic [3:0] lScore, rScore;
 		 
-		 ball b (                .Reset(Reset_h),
-										 .frame_clk(VGA_VS),
-										 .keycode(keycode_l),
-										 .BallX(ballxsig),
-										 .BallY(ballysig),
-										 .BallS(ballsizesig),
-										 .leftPaddleTop(paddleLxsig - 9'h2F ),
-										 .leftPaddleBottom(paddleLxsig + 9'h2F ), 
-										 .rightPaddleTop(paddleRxsig - 9'h2F), 
-										 .rightPaddleBottom(paddleRxsig + 9'h2F),
-										 .leftScore(lScore),
-										 .rightScore(rScore)
+		 ball b (               .Reset(Reset_h),
+								.frame_clk(VGA_VS),
+								.keycode(keycode_l),
+								.BallX(ballxsig),
+								.BallY(ballysig),
+								.BallS(ballsizesig),
+								.Paddle_sizeL(paddleLsizesig),
+								.Paddle_sizeR(paddleRsizesig),
+								.paddleLX(paddleLxsig),
+								.paddleLY(paddleLysig),
+								.paddleRX(paddleRxsig),
+								.paddleRY(paddleRysig),
+								.leftScore(lScore),
+								.rightScore(rScore)
 		 );
 
 

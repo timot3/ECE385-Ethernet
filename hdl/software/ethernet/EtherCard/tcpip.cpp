@@ -242,7 +242,7 @@ static void make_tcphead(uint16_t rel_ack_num, uint8_t cp_seq) {
 }
 
 static void make_arp_answer_from_request() {
-  printf("In make arp answer form request\n");
+  printf("In make arp answer from request\n");
   setMACs(gPB + ETH_SRC_MAC);
   gPB[ETH_ARP_OPCODE_H_P] = ETH_ARP_OPCODE_REPLY_H_V;
   gPB[ETH_ARP_OPCODE_L_P] = ETH_ARP_OPCODE_REPLY_L_V;

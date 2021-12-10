@@ -14,7 +14,8 @@
 
 
 module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size, paddleLX, paddleLY, Paddle_sizeL, paddleRX, paddleRY, Paddle_sizeR,
-                        output logic [7:0]  Red, Green, Blue );
+                        output logic [7:0]  Red, Green, Blue,
+                        output logic isCollidingL, isCollidingR );
 								
     logic ball_on;
     logic plOn, pROn;
@@ -57,7 +58,19 @@ module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
             pROn = 1'b1;
         else 
             pROn = 1'b0;
-	  end 
+	  end
+
+    always_comb begin
+        if(ball_on == 1'b1 && plOn == 1'b1)
+            isCollidingL = 1'b1;
+        else
+            isCollidingL = 1'b0;
+        if(ball_on == 1'b1 && pROn == 1'b1)
+            isCollidingR = 1'b1;
+        else
+            isCollidingR = 1'b0;
+    end 
+
         
     always_comb
     begin:RGB_Display

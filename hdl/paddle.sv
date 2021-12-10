@@ -12,7 +12,7 @@
 //    UIUC ECE Department                                                --
 //-------------------------------------------------------------------------
 
-
+// BallX is paddleCenterX, BallY is paddleCenterY 
 module  paddle ( input Reset, frame_clk,
 					input [7:0] keycode,
 					input isLeft,
@@ -35,7 +35,7 @@ module  paddle ( input Reset, frame_clk,
 
     assign Ball_Size = 4;  // assigns the value 4 as a 10-digit binary number, ie "0000000100"
 
-    always_ff @ (posedge Reset or negedge frame_clk )
+    always_ff @ (posedge Reset or posedge frame_clk )
     begin: Move_Ball
         if (Reset)  // Asynchronous Reset
         begin 
@@ -68,7 +68,7 @@ module  paddle ( input Reset, frame_clk,
                     
 						if(isLeft == 1'b1) begin
 							  case (keycode)            
-								  8'h1 : begin // up
+								  8'h2 : begin // up
 
 												  Ball_Y_Motion <= Ball_Y_Step;//S
 												  Ball_X_Motion <= 0;
@@ -78,7 +78,7 @@ module  paddle ( input Reset, frame_clk,
 												  end
 											 end
 												  
-								  8'h2 : begin // down
+								  8'h1 : begin // down
 												  Ball_Y_Motion <= -Ball_Y_Step;//W
 												  Ball_X_Motion <= 0;
 												  if ((Ball_Y_Pos - Ball_Size - Ball_Size - Ball_Size) <= Ball_Y_Min) begin
@@ -93,7 +93,7 @@ module  paddle ( input Reset, frame_clk,
 							endcase
 						end else begin
 													  case (keycode)            
-								  8'h1 : begin // 22 in decimal
+								  8'h2 : begin // 22 in decimal
 
 												  Ball_Y_Motion <= Ball_Y_Step;//S
 												  Ball_X_Motion <= 0;
@@ -103,7 +103,7 @@ module  paddle ( input Reset, frame_clk,
 												  end
 											 end
 												  
-								  8'h2 : begin // 26 in decimal 
+								  8'h1 : begin // 26 in decimal 
 												  Ball_Y_Motion <= -Ball_Y_Step;//W
 												  Ball_X_Motion <= 0;
 												  if ((Ball_Y_Pos - Ball_Size - Ball_Size - Ball_Size) <= Ball_Y_Min) begin

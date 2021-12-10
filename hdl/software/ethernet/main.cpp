@@ -6,7 +6,7 @@
 
 // 0x00 = pinging, 0x01 = fetch data from website, 0x02 = host uptime website, 0x03 = post request
 // 0x04 = get user input from site, 0x05 = set alma lights from site
-#define PROG_NUM 0x00
+#define PROG_NUM 0x06
 
 #include "EtherCard/EtherCard.h"
 #include "altera_avalon_pio_regs.h"
@@ -795,6 +795,120 @@ int main() {
       errorflag = 0;
     }
 #endif
+  }
+
+  return 0;
+}
+
+#elif PROG_NUM == 0x06
+#include "EtherCard/bufferfiller.h"
+#include <iostream>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+
+static byte mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
+
+byte Ethernet::buffer[2000];
+BufferFiller bfill;
+char keyPressedArr[50];
+int locInArr = 0;
+
+#define KEYCODE_L_BASE 0x11160
+#define KEYCODE_R_BASE 0x11150
+
+
+void setKeycodeL(WORD keycode) {
+  IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_L_BASE, keycode);
+}
+
+void setKeycodeR(WORD keycode) {
+  IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_R_BASE, keycode);
+}
+
+static uint16_t homePage() {
+  long t = clock() / 1000;
+  uint16_t h = t / 3600;
+  byte m = (t / 60) % 60;
+  byte s = t % 60;
+  bfill = ether.tcpOffset();
+  bfill.emit_p("HTTP/1.0 200 OK\r\n"
+               "Content-Type: text/html\r\n"
+               "Pragma: no-cache\r\n"
+               "\r\n"
+               "<title>ECE 385 FPGA Server</title>"
+               "<center><form>"
+               "<label for=\"query\"></label>"
+               "<input type=\"text\" id=\"DATA\" name=\"DATA\" "
+               "placeholder=\"Enter some text here...\"><br><br>"
+               "<input type=\"submit\" value=\"Send data\">"
+               "</form>"
+               "</center>",
+               h / 10, h % 10, m / 10, m % 10, s / 10, s % 10, keyPressedArr);
+
+  return bfill.position();
+}
+
+int main() {
+  printf("\n[User Data Server]\n");
+
+  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
+  if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
+    printf("Failed to access Ethernet controller\n");
+
+  const static uint8_t ip[] = {192, 168, 0, 220};
+  const static uint8_t gw[] = {192, 168, 0, 1};
+  const static uint8_t dns[] = {192, 168, 0, 1};
+  const static uint8_t mask[] = {255, 255, 255, 0};
+
+  if (!ether.staticSetup(ip, gw, dns, mask)) {
+    // handle failure to configure static IP address (current implementation
+    // always returns true!)
+    printf("pain and suffering");
+  }
+
+  printf("starting while loop\n");
+  while (1) {
+    uint16_t len = ether.packetReceive();
+    uint16_t pos = ether.packetLoop(len);
+    int vals[4];
+
+
+    if (pos) { // check if valid tcp data is received
+      if (strstr((char *)Ethernet::buffer + pos, "GET /?DATA=")) {
+        std::string input((const char *)(Ethernet::buffer + pos + 11));
+        std::string endStr = " HTTP/1.1";
+        unsigned last = input.find(endStr);
+        input = input.substr(0, last);
+
+        int i = 0;
+
+        std::string delimiter = ":";
+        size_t pos = 0;
+        std::string token;
+        while ((pos = input.find(delimiter)) != std::string::npos) {
+            token = input.substr(0, pos);
+            std::cout << token << std::endl;
+            input.erase(0, pos + delimiter.length());
+            vals[i] = atoi(token.c_str());
+            i++;
+        }
+        std::cout << input << std::endl;
+        vals[i] = atoi(token.c_str());
+
+        printf("User input: %d %d %d %d\n", vals[0], vals[1], vals[2], vals[3]);
+
+
+      }
+      ether.httpServerReply(homePage()); // send web page data
+
+      if (vals[0] != 0) {
+      	setKeycodeL(vals[0]);
+      }
+      if (vals[2] != 0) {
+      	setKeycodeR(vals[2]);
+      }
+    }
   }
 
   return 0;

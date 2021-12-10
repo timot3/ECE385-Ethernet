@@ -82,7 +82,7 @@ module lab61 (
 	logic [9:0] drawxsig, drawysig, ballxsig, ballysig, ballsizesig, paddleLxsig, paddleLysig, paddleLsizesig, paddleRxsig, paddleRysig, paddleRsizesig;
 	logic Reset_h, vssig, blank, sync, VGA_Clk;
 	logic [7:0] Red, Blue, Green;
-	logic [7:0] keycode;
+	logic [7:0] keycode_l, keycode_r;
 	
 	
     logic [9:0] leftPaddleTop, leftPaddleBottom, rightPaddleTop, rightPaddleBottom;
@@ -179,7 +179,9 @@ module lab61 (
 
 		//LEDs and GPIO
 		.led_wire_export(LEDR),	
-		.keycode_export(keycode),
+		.keycode_l_export(keycode_l),
+		.keycode_r_export(keycode_r),
+
 //		.gpio_wire_export(),
 		.hex_digits_export({hex_num_4, hex_num_3, hex_num_1, hex_num_0})
 	 );
@@ -218,13 +220,7 @@ module lab61 (
 	// module  ball (  input Reset, frame_clk,
 	//                 input [7:0] keycode,
 	//                 output [9:0]  BallX, BallY, BallS );
-		 ball b (                .Reset(Reset_h),
-										 .frame_clk(VGA_VS),
-										 .keycode(keycode),
-										 .BallX(ballxsig),
-										 .BallY(ballysig),
-										 .BallS(ballsizesig)
-		 );
+
 
 
 	// module  color_mapper ( input        [9:0] BallX, BallY, DrawX, DrawY, Ball_size,
@@ -255,7 +251,7 @@ module lab61 (
 			
 		 paddle paddleLeft (     .Reset(Reset_h),
 										 .frame_clk(VGA_VS),
-										 .keycode(keycode),
+										 .keycode(keycode_l),
 										 .isLeft(1'b1),
 										 .BallX(paddleLxsig),
 										 .BallY(paddleLysig),
@@ -265,11 +261,27 @@ module lab61 (
 		 
 		 paddle paddleRight (    .Reset(Reset_h),
 										 .frame_clk(VGA_VS),
-										 .keycode(keycode),
+										 .keycode(keycode_r),
 										 .isLeft(1'b0),
 										 .BallX(paddleRxsig),
 										 .BallY(paddleRysig),
 										 .BallS(paddleRsizesig)
+		 );
+		 
+		 logic [3:0] lScore, rScore;
+		 
+		 ball b (                .Reset(Reset_h),
+										 .frame_clk(VGA_VS),
+										 .keycode(keycode_l),
+										 .BallX(ballxsig),
+										 .BallY(ballysig),
+										 .BallS(ballsizesig),
+										 .leftPaddleTop(paddleLxsig - 9'h2F ),
+										 .leftPaddleBottom(paddleLxsig + 9'h2F ), 
+										 .rightPaddleTop(paddleRxsig - 9'h2F), 
+										 .rightPaddleBottom(paddleRxsig + 9'h2F),
+										 .leftScore(lScore),
+										 .rightScore(rScore)
 		 );
 
 

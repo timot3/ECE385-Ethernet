@@ -22,21 +22,20 @@ module  paddle ( input Reset, frame_clk,
         
     parameter [9:0] Ball_X_Center=20;  // Center position on the X axis
     parameter [9:0] Ball_Y_Center=120;  // Center position on the Y axis
-	 parameter [9:0] Ball_XR_Center=620;  // Center position on the X axis
+	parameter [9:0] Ball_XR_Center=619;  // Center position on the X axis
     parameter [9:0] Ball_YR_Center=120;  // Center position on the Y axis
     parameter [9:0] Ball_X_Min=0;       // Leftmost point on the X axis
     parameter [9:0] Ball_X_Max=639;     // Rightmost point on the X axis
     parameter [9:0] Ball_Y_Min=0;       // Topmost point on the Y axis
     parameter [9:0] Ball_Y_Max=479;     // Bottommost point on the Y axis
-    parameter [9:0] Ball_X_Step=1;      // Step size on the X axis
-    parameter [9:0] Ball_Y_Step=1;      // Step size on the Y axis
+    parameter [9:0] Ball_Y_Step=6;      // Step size on the Y axis
 	 
 	 
 
 
     assign Ball_Size = 4;  // assigns the value 4 as a 10-digit binary number, ie "0000000100"
 
-    always_ff @ (posedge Reset or posedge frame_clk )
+    always_ff @ (posedge Reset or negedge frame_clk )
     begin: Move_Ball
         if (Reset)  // Asynchronous Reset
         begin 
@@ -69,9 +68,9 @@ module  paddle ( input Reset, frame_clk,
                     
 						if(isLeft == 1'b1) begin
 							  case (keycode)            
-								  8'h16 : begin // 22 in decimal
+								  8'h1 : begin // up
 
-												  Ball_Y_Motion <= 1;//S
+												  Ball_Y_Motion <= Ball_Y_Step;//S
 												  Ball_X_Motion <= 0;
 												  if ((Ball_Y_Pos + Ball_Size) >= Ball_Y_Max) begin
 														Ball_Y_Motion <= 0;
@@ -79,8 +78,8 @@ module  paddle ( input Reset, frame_clk,
 												  end
 											 end
 												  
-								  8'h1A : begin // 26 in decimal 
-												  Ball_Y_Motion <= -1;//W
+								  8'h2 : begin // down
+												  Ball_Y_Motion <= -Ball_Y_Step;//W
 												  Ball_X_Motion <= 0;
 												  if ((Ball_Y_Pos - Ball_Size - Ball_Size - Ball_Size) <= Ball_Y_Min) begin
 														Ball_Y_Motion <= 0;
@@ -94,9 +93,9 @@ module  paddle ( input Reset, frame_clk,
 							endcase
 						end else begin
 													  case (keycode)            
-								  8'h51 : begin // 22 in decimal
+								  8'h1 : begin // 22 in decimal
 
-												  Ball_Y_Motion <= 1;//S
+												  Ball_Y_Motion <= Ball_Y_Step;//S
 												  Ball_X_Motion <= 0;
 												  if ((Ball_Y_Pos + Ball_Size) >= Ball_Y_Max) begin
 														Ball_Y_Motion <= 0;
@@ -104,8 +103,8 @@ module  paddle ( input Reset, frame_clk,
 												  end
 											 end
 												  
-								  8'h52 : begin // 26 in decimal 
-												  Ball_Y_Motion <= -1;//W
+								  8'h2 : begin // 26 in decimal 
+												  Ball_Y_Motion <= -Ball_Y_Step;//W
 												  Ball_X_Motion <= 0;
 												  if ((Ball_Y_Pos - Ball_Size - Ball_Size - Ball_Size) <= Ball_Y_Min) begin
 														Ball_Y_Motion <= 0;

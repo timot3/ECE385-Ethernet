@@ -83,3 +83,5 @@ PLLJ_PLLSPE_INFO.txt
 *.zip
 
 /postServer/node_modules
+
+!/PCB/*.zip

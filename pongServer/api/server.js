@@ -45,27 +45,27 @@ app.post('/sendPress', (req, res) => {
     console.log("p1: " + player1Press + ", p2: " + player2Press);
 
     // Send data to FPGA whenever update occurs
-    // if(player1Previous != player1Press || player2Previous != player2Press) {
-    //     var strOut = "/?DATA=" + player1Press + ":" + player1Previous + ":" + player2Press + ":" + player2Previous;
-    //     var options = {
-    //         host: ip,
-    //         path: strOut
-    //     }
-    //     var request = http.request(options, function (res) {
-    //         var data = '';
-    //         res.on('data', function (chunk) {
-    //             data += chunk;
-    //         });
-    //         res.on('end', function () {
-    //             console.log(data);
+    if(player1Previous != player1Press || player2Previous != player2Press) {
+        var strOut = "/?DATA=" + player1Press + ":" + player1Previous + ":" + player2Press + ":" + player2Previous;
+        var options = {
+            host: ip,
+            path: strOut
+        }
+        var request = http.request(options, function (res) {
+            var data = '';
+            res.on('data', function (chunk) {
+                data += chunk;
+            });
+            res.on('end', function () {
+                console.log(data);
     
-    //         });
-    //     });
-    //     request.on('error', function (e) {
-    //         console.log(e.message);
-    //     });
-    //     request.end();
-    // }
+            });
+        });
+        request.on('error', function (e) {
+            console.log(e.message);
+        });
+        request.end();
+    }
 
     res.json({response: "received"})
 });

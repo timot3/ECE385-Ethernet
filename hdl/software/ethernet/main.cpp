@@ -1,3 +1,6 @@
+// EtherCard library based on https://github.com/njh/EtherCard and edited
+// to support NIOS II
+
 #include <stdio.h>
 #include <system.h>
 
@@ -28,6 +31,8 @@ extern "C" {
 #endif
 
 #if PROG_NUM == 0x00
+// Ping program - pings Google and prints out how long it took
+// Also used to test keyboard - prints out button codes pressed
 // ethernet interface mac addreBss, must be unique on the LAN
 static char mymac[] = {0x74, 0x69, 0x69, 0x2D, 0x30, 0x31};
 //static char mymac[] = {0x74, 0x00, 0x69, 0x2D, 0x30, 0x31};
@@ -102,7 +107,7 @@ void printSignedHex0(signed char value) {
 }
 
 int main() {
-  printf("\n[pings]");
+  printf("\n[Ping]\n");
 
 #if USING_KEYBOARD
   BYTE rcode;
@@ -122,12 +127,12 @@ int main() {
   USB_init();
 #endif
 
+  // Initialize EtherCard
   uint16_t sz = sizeof ether.buffer;
   printf("Size: %x\n", sz);
   if (ether.begin(sz, (const uint8_t *)mymac, SS) == 0)
     printf("Failed to access Ethernet controller");
 
-  ////  return 0;
   if (!ether.dhcpSetup())
     printf("DHCP failed");
 
@@ -146,7 +151,7 @@ int main() {
   ether.printIp("GW:  ", ether.gwip);
 
   // use DNS to locate the IP address we want to ping
-  if (!ether.dnsLookup("www.4chan.org"))
+  if (!ether.dnsLookup("www.google.com"))
     printf("DNS failed");
   //  ether.hisip[0] = 34;
   //  ether.hisip[1] = 222;
@@ -179,6 +184,7 @@ int main() {
       ether.clientIcmpRequest(ether.hisip);
     }
 
+    // Poll keyboard, print out keypress codes
 #if USING_KEYBOARD
     printf(".");
     MAX3421E_Task();
@@ -229,9 +235,7 @@ int main() {
         printf("USB Error State\n");
         // print out string descriptor here
       }
-    } else // not in USB running state
-    {
-
+    } else { // not in USB running state
       printf("USB task state: ");
       printf("%x\n", GetUsbTaskState());
       if (runningdebugflag) { // previously running, reset USB hardware just to
@@ -248,7 +252,7 @@ int main() {
 }
 
 #elif PROG_NUM == 0x01
-// Demo using DHCP and DNS to perform a web client request.
+// Fetch data from website and print contents to console
 // 2011-06-08 <jc@wippler.nl>
 //
 // License: GPLv2
@@ -270,8 +274,9 @@ static void my_callback(byte status, uint16_t off, uint16_t len) {
 }
 
 int main() {
-  printf("\n[webClient]\n");
+  printf("\n[Fetch Website Data]\n");
 
+  // Initialize EtherCard
   uint16_t sz = sizeof ether.buffer;
   if (ether.begin(sz, (const uint8_t *)mymac, SS) == 0)
     printf("Failed to access Ethernet controller");
@@ -315,7 +320,8 @@ int main() {
 }
 
 #elif PROG_NUM == 0x02
-// This is a demo of the RBBB running as webserver with the EtherCard
+// Host static page which can be accessed through FPGA's IP. Displays
+// uptime and last 50 keypresses (if keyboard is enabled)
 // 2010-05-28 <jc@wippler.nl>
 //
 // License: GPLv2
@@ -381,6 +387,7 @@ void setKeycode(WORD keycode) {
 }
 #endif
 
+// Static page contents
 static uint16_t homePage() {
   long t = clock() / 1000;
   uint16_t h = t / 3600;
@@ -405,7 +412,7 @@ static uint16_t homePage() {
 }
 
 int main() {
-  printf("\n[RBBB Server]\n");
+  printf("\n[Uptime Static Page]\n");
 
 #if USING_KEYBOARD
   BYTE rcode;
@@ -424,7 +431,7 @@ int main() {
   USB_init();
 #endif
 
-  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
+  // Initialize EtherCard
   if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
     printf("Failed to access Ethernet controller\n");
   ether.staticSetup(myip);
@@ -435,6 +442,7 @@ int main() {
     if (pos)                             // check if valid tcp data is received
       ether.httpServerReply(homePage()); // send web page data
 
+    // Get keyboard codes
 #if USING_KEYBOARD
     MAX3421E_Task();
     USB_Task();
@@ -484,6 +492,7 @@ int main() {
 }
 
 #elif PROG_NUM == 0x03
+// Make POST requests to alma.lol to change lights in apartment randomly
 
 // Using
 // https://stackoverflow.com/questions/49244535/arduino-uno-post-data-using-enc28j60
@@ -507,8 +516,9 @@ static void my_result_cb(byte status, uint16_t off, uint16_t len) {
 }
 
 int main() {
-  printf("\n[getStaticIP]\n");
+  printf("\n[Change ALMA lights]\n");
 
+  // Initialize EtherCard
   uint16_t sz = sizeof ether.buffer;
   printf("Size: %x\n", sz);
   if (ether.begin(sz, (const uint8_t *)mymac, SS) == 0)
@@ -546,6 +556,7 @@ int main() {
   while (1) {
     ether.packetLoop(ether.packetReceive());
 
+    // Send POST request every REQUEST_RATE ms
     if (clock() > timer + REQUEST_RATE) {
       timer = clock();
       printf("\n>>> REQ SENDING \n");
@@ -563,6 +574,7 @@ int main() {
 }
 
 #elif PROG_NUM == 0x04
+// Get user input from website
 
 #include "EtherCard/bufferfiller.h"
 #include <iostream>
@@ -577,6 +589,7 @@ BufferFiller bfill;
 char keyPressedArr[50];
 int locInArr = 0;
 
+// Static page contents
 static uint16_t homePage() {
   long t = clock() / 1000;
   uint16_t h = t / 3600;
@@ -603,7 +616,7 @@ static uint16_t homePage() {
 int main() {
   printf("\n[User Data Server]\n");
 
-  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
+  // Initialize EtherCard
   if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
     printf("Failed to access Ethernet controller\n");
 
@@ -624,6 +637,7 @@ int main() {
     uint16_t pos = ether.packetLoop(len);
 
     if (pos) { // check if valid tcp data is received
+      // Check if data was sent (different URL)
       if (strstr((char *)Ethernet::buffer + pos, "GET /?DATA=")) {
         std::string input((const char *)(Ethernet::buffer + pos + 11));
         std::string endStr = " HTTP/1.1";
@@ -640,6 +654,8 @@ int main() {
 }
 
 #elif PROG_NUM == 0x05
+// Set ALMA lights based on input on FPGA site
+
 #include "EtherCard/bufferfiller.h"
 
 // ethernet interface mac address, must be unique on the LAN
@@ -701,6 +717,7 @@ void setKeycode(WORD keycode) {
 }
 #endif
 
+// Static page contents
 static uint16_t homePage() {
   bfill = ether.tcpOffset();
   bfill.emit_p("HTTP/1.0 200 OK\r\n"
@@ -744,13 +761,13 @@ int main() {
 //  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
 //  if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
 //    printf("Failed to access Ethernet controller\n");
-//  ether.staticSetup(myip);
+  ether.staticSetup(myip);
   while (1) {
-//    uint16_t len = ether.packetReceive();
-//    uint16_t pos = ether.packetLoop(len);
-//
-//    if (pos)                             // check if valid tcp data is received
-//      ether.httpServerReply(homePage()); // send web page data
+    uint16_t len = ether.packetReceive();
+    uint16_t pos = ether.packetLoop(len);
+
+    if (pos)                             // check if valid tcp data is received
+      ether.httpServerReply(homePage()); // send web page data
 
 #if USING_KEYBOARD
     MAX3421E_Task();
@@ -801,6 +818,8 @@ int main() {
 }
 
 #elif PROG_NUM == 0x06
+// Pong server - recieve requests from Pi server to move paddles
+
 #include "EtherCard/bufferfiller.h"
 #include <iostream>
 #include <stdlib.h>
@@ -817,7 +836,6 @@ int locInArr = 0;
 #define KEYCODE_L_BASE 0x11160
 #define KEYCODE_R_BASE 0x11150
 
-
 void setKeycodeL(WORD keycode) {
   IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_L_BASE, keycode);
 }
@@ -826,6 +844,7 @@ void setKeycodeR(WORD keycode) {
   IOWR_ALTERA_AVALON_PIO_DATA(KEYCODE_R_BASE, keycode);
 }
 
+// Static page contents
 static uint16_t homePage() {
   long t = clock() / 1000;
   uint16_t h = t / 3600;
@@ -837,22 +856,15 @@ static uint16_t homePage() {
                "Pragma: no-cache\r\n"
                "\r\n"
                "<title>ECE 385 FPGA Server</title>"
-               "<center><form>"
-               "<label for=\"query\"></label>"
-               "<input type=\"text\" id=\"DATA\" name=\"DATA\" "
-               "placeholder=\"Enter some text here...\"><br><br>"
-               "<input type=\"submit\" value=\"Send data\">"
-               "</form>"
-               "</center>",
-               h / 10, h % 10, m / 10, m % 10, s / 10, s % 10, keyPressedArr);
+               "<center><h1> Go to alma.lol:90 to move paddles</h1></center>");
 
   return bfill.position();
 }
 
 int main() {
-  printf("\n[User Data Server]\n");
+  printf("\n[Pong Server]\n");
 
-  // Change 'SS' to your Slave Select pin, if you arn't using the default pin
+  // Initialize EtherCard
   if (ether.begin(sizeof Ethernet::buffer, mymac, SS) == 0)
     printf("Failed to access Ethernet controller\n");
 
@@ -875,6 +887,7 @@ int main() {
 
 
     if (pos) { // check if valid tcp data is received
+      // Check if data was sent (different URL)
       if (strstr((char *)Ethernet::buffer + pos, "GET /?DATA=")) {
         std::string input((const char *)(Ethernet::buffer + pos + 11));
         std::string endStr = " HTTP/1.1";
@@ -902,12 +915,9 @@ int main() {
       }
       ether.httpServerReply(homePage()); // send web page data
 
-      //if (vals[0] != 0) {
-      	setKeycodeL(vals[0]);
-      //}
-      //if (vals[2] != 0) {
-      	setKeycodeR(vals[2]);
-      //}
+      // Set keycodes for the two players
+      setKeycodeL(vals[0]);
+      setKeycodeR(vals[2]);
     }
   }
 

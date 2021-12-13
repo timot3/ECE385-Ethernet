@@ -1,10 +1,10 @@
 # ECE385-Ethernet
 ECE 385 Final Project -- Ethernet on MAX10-DE10 Lite FPGA
 
+This is a port of the [EtherCard](https://github.com/njh/EtherCard) library to run on the Nios II soft processor.
 
-## Documentation
 
-### To Run
+## To Run
 Connect custom shield to FPGA, connect ethernet and keyboard (depending on which test program you're running)
 
 Program FPGA through Quartus like normal. 
@@ -17,7 +17,7 @@ To run the C++ code (and all the networking stuff), select the program number yo
 SPI, or serial peripheral interface, uses a bus with four signals (SCLK, MOSI, MISO, and CS/SS) in order to communicate with the processor. The chip controllers connected to the SPI bus are synchronized with the processor. The processor is often referred to as a master device, as it controls the devices on the SPI bus. Likewise, the other devices on the SPI bus are slave devices. SCLK is the clock from the master (processor) in order to synchronize the devices connected via SPI. MOSI is Master out, slave in, which is data sent from the master to the slave. MISO is master in, slave out, which is the data coming from the slave or connected device. SS/CS is the chip select to determine what controller on the SPI bus the master is communicating with.
  
 ## Ethernet
-The Ethernet driver we used was based on an Arduino ENC28J60 library called EtherCard. It provides support for DHCP, DNS lookup, and basic HTTP support. Using example programs, we can do things such as ping websites, host a static webpage on the FPGA, make POST/GET requests to APIs, fetch HTML data from webpages, and more. We were able to successfully port the entire library to the Nios II. 
+The Ethernet driver we used was based on an Arduino ENC28J60 library called [EtherCard](https://github.com/njh/EtherCard). It provides support for DHCP, DNS lookup, and basic HTTP support. Using example programs, we can do things such as ping websites, host a static webpage on the FPGA, make POST/GET requests to APIs, fetch HTML data from webpages, and more. We were able to successfully port the entire library to the Nios II. 
 
 ### Porting Process 
 We knew there would need to change all Arduino specific code to code supported by the Nios II. This included print statements (Arduino uses Serial.println() vs printf()), SPI commands (Arduino uses specific register values vs Avalon commands on Nios II), memory access (Arduino has RAM specific commands for memcpy, etc.), and more. 
